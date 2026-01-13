@@ -148,6 +148,26 @@ export async function updateQuestion(formData: FormData) {
             }
         })
 
+        // LIVE REGRADING LOGIC
+        // Update grading for all existing answers to this question based on the new options
+        // This ensures that active exams reflect the corrections immediately for grading purposes
+        const newOptions = JSON.parse(optionsJson) as QuestionOption[]
+
+        // We iterate through each option and update all answers that selected it
+        // This is efficient because we do one update query per option (max 4-5 queries)
+        // instead of one per answer.
+        for (const option of newOptions) {
+            await prisma.answer.updateMany({
+                where: {
+                    question_id: id,
+                    selected_option_id: option.id
+                },
+                data: {
+                    is_correct: option.is_correct
+                }
+            })
+        }
+
         revalidatePath('/dashboard/questions')
         revalidatePath('/dashboard/categories')
         return { success: true }
