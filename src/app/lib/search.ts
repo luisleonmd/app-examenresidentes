@@ -18,7 +18,7 @@ export async function globalSearch(query: string) {
         // Search exams
         const exams = await prisma.exam.findMany({
             where: {
-                title: { contains: searchTerm, mode: 'insensitive' }
+                title: { contains: searchTerm }
             },
             select: {
                 id: true,
@@ -35,8 +35,8 @@ export async function globalSearch(query: string) {
             questions = await prisma.question.findMany({
                 where: {
                     OR: [
-                        { text: { contains: searchTerm, mode: 'insensitive' } },
-                        { category: { name: { contains: searchTerm, mode: 'insensitive' } } }
+                        { text: { contains: searchTerm } },
+                        { category: { name: { contains: searchTerm } } }
                     ],
                     status: 'PUBLISHED'
                 },
@@ -56,8 +56,8 @@ export async function globalSearch(query: string) {
                 where: {
                     role: 'RESIDENTE',
                     OR: [
-                        { nombre: { contains: searchTerm, mode: 'insensitive' } },
-                        { cedula: { contains: searchTerm, mode: 'insensitive' } }
+                        { nombre: { contains: searchTerm } },
+                        { cedula: { contains: searchTerm } }
                     ]
                 },
                 select: {
@@ -72,7 +72,7 @@ export async function globalSearch(query: string) {
         // Search categories
         const categories = await prisma.questionCategory.findMany({
             where: {
-                name: { contains: searchTerm, mode: 'insensitive' }
+                name: { contains: searchTerm }
             },
             select: {
                 id: true,
