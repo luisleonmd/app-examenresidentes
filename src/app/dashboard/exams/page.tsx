@@ -34,7 +34,6 @@ export default async function ExamsPage() {
                         <TableRow>
                             <TableHead>Título</TableHead>
                             <TableHead>Asignado a</TableHead>
-                            <TableHead>Curso</TableHead>
                             {!isResident && <TableHead>Creador</TableHead>}
                             <TableHead>Ventana</TableHead>
                             <TableHead>Preguntas</TableHead>
@@ -44,7 +43,7 @@ export default async function ExamsPage() {
                     <TableBody>
                         {exams.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                                     No hay exámenes programados.
                                 </TableCell>
                             </TableRow>
@@ -60,7 +59,6 @@ export default async function ExamsPage() {
                                             ? exam.profiles.map(p => p.user.nombre).join(", ")
                                             : "General"}
                                     </TableCell>
-                                    <TableCell>{exam.course?.name}</TableCell>
                                     {!isResident && <TableCell>{exam.creator?.nombre}</TableCell>}
                                     <TableCell className="text-sm">
                                         {format(new Date(exam.start_window), "dd MMM", { locale: es })} - {format(new Date(exam.end_window), "dd MMM yyyy", { locale: es })}
