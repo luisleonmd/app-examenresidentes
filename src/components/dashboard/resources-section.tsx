@@ -27,7 +27,7 @@ export function ResourcesSection({ resources, userRole }: { resources: any[], us
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <ImageIcon className="h-5 w-5 text-purple-500" />
-                            Rotaciones
+                            Rotaciones a Evaluar
                         </CardTitle>
                         <CardDescription>Cronograma y asignaciones visuales</CardDescription>
                     </CardHeader>
@@ -64,7 +64,7 @@ export function ResourcesSection({ resources, userRole }: { resources: any[], us
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <FileText className="h-5 w-5 text-blue-500" />
-                            Documentos
+                            Documentos de Apoyo
                         </CardTitle>
                         <CardDescription>Material de estudio y guías</CardDescription>
                     </CardHeader>
@@ -104,7 +104,7 @@ export function ResourcesSection({ resources, userRole }: { resources: any[], us
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <ExternalLink className="h-5 w-5 text-orange-500" />
-                            Enlaces y Temarios
+                            Temario de Rotaciones
                         </CardTitle>
                         <CardDescription>Accesos rápidos a recursos externos</CardDescription>
                     </CardHeader>
