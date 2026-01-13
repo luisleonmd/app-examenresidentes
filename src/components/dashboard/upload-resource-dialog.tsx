@@ -76,9 +76,9 @@ export function UploadResourceDialog() {
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="LINK">Enlace Web / URL</SelectItem>
-                                <SelectItem value="DOCUMENT">Documento (PDF/Word) [Max 5MB]</SelectItem>
-                                <SelectItem value="ROTATION_IMAGE">Imagen de Rotaciones</SelectItem>
+                                <SelectItem value="ROTATION_IMAGE">Rotaciones (Imagen)</SelectItem>
+                                <SelectItem value="DOCUMENT">Documentos (PDF/Word)</SelectItem>
+                                <SelectItem value="LINK">Temario / Enlaces</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
