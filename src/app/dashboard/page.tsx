@@ -39,27 +39,27 @@ export default async function DashboardPage() {
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                     <StatsCard
                         title="Total Exámenes"
-                        value={stats.totalExams}
+                        value={stats.totalExams ?? 0}
                         icon={BookOpen}
                         description="Exámenes creados"
                     />
                     <StatsCard
                         title="Total Estudiantes"
-                        value={stats.totalStudents}
+                        value={stats.totalStudents ?? 0}
                         icon={Users}
                         description="Residentes activos"
                     />
                     <StatsCard
                         title="Banco de Preguntas"
-                        value={stats.totalQuestions}
+                        value={stats.totalQuestions ?? 0}
                         icon={FileQuestion}
                         description="Preguntas publicadas"
                     />
                     <StatsCard
                         title="Promedio General"
-                        value={`${stats.avgScore}%`}
+                        value={`${stats.avgScore ?? 0}%`}
                         icon={TrendingUp}
-                        description={`${stats.totalAttempts} exámenes completados`}
+                        description={`${stats.totalAttempts ?? 0} exámenes completados`}
                     />
                 </div>
             )}
@@ -68,19 +68,19 @@ export default async function DashboardPage() {
                 <div className="grid gap-4 md:grid-cols-3">
                     <StatsCard
                         title="Mis Exámenes"
-                        value={stats.totalExams}
+                        value={stats.totalExams ?? 0}
                         icon={BookOpen}
                         description="Exámenes creados"
                     />
                     <StatsCard
                         title="Intentos Completados"
-                        value={stats.totalAttempts}
+                        value={stats.totalAttempts ?? 0}
                         icon={Users}
                         description="Por estudiantes"
                     />
                     <StatsCard
                         title="Promedio"
-                        value={`${stats.avgScore}%`}
+                        value={`${stats.avgScore ?? 0}%`}
                         icon={TrendingUp}
                         description="Calificación promedio"
                     />
@@ -91,19 +91,19 @@ export default async function DashboardPage() {
                 <div className="grid gap-4 md:grid-cols-3">
                     <StatsCard
                         title="Exámenes Realizados"
-                        value={stats.totalAttempts}
+                        value={stats.totalAttempts ?? 0}
                         icon={BookOpen}
                         description="Completados"
                     />
                     <StatsCard
                         title="Mi Promedio"
-                        value={`${stats.avgScore}%`}
+                        value={`${stats.avgScore ?? 0}%`}
                         icon={Award}
                         description="Calificación promedio"
                     />
                     <StatsCard
                         title="Próximos Exámenes"
-                        value={stats.upcomingExams}
+                        value={stats.upcomingExams ?? 0}
                         icon={Calendar}
                         description="Disponibles ahora"
                     />
