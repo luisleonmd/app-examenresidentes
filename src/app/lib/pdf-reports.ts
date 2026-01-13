@@ -64,7 +64,7 @@ export async function generateExamReport(attemptId: string) {
                     score: attempt.score
                 },
                 questions
-            })
+            }) as any
         )
 
         // Convert buffer to base64 for client download
@@ -129,7 +129,7 @@ export async function generateCourseReport(examId: string) {
                 exam: { title: exam.title },
                 students,
                 statistics: { average, passed, failed, pending }
-            })
+            }) as any
         )
 
         const base64 = pdfBuffer.toString('base64')

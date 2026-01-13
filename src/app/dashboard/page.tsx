@@ -113,13 +113,13 @@ export default async function DashboardPage() {
             {/* Performance Chart */}
             <div className="grid gap-4 md:grid-cols-2">
                 <PerformanceChart
-                    data={performanceData}
+                    data={performanceData || []}
                     title={role === 'RESIDENTE' ? "Mi Rendimiento" : "Rendimiento General"}
                     description={role === 'RESIDENTE' ? "Evolución de mis calificaciones" : "Evolución de calificaciones"}
                 />
 
                 {/* Activity Feed */}
-                <ActivityFeed activities={activities} />
+                <ActivityFeed activities={activities || []} />
             </div>
         </div>
     )

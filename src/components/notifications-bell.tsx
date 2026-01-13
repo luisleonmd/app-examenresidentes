@@ -29,8 +29,8 @@ export function NotificationsBell() {
     const fetchNotifications = async () => {
         const result = await getNotifications()
         if (result.success) {
-            setNotifications(result.notifications)
-            setUnreadCount(result.unreadCount)
+            setNotifications(result.notifications || [])
+            setUnreadCount(result.unreadCount || 0)
         }
     }
 
