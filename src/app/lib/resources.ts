@@ -54,9 +54,9 @@ export async function createResource(formData: FormData) {
             (type === 'DOCUMENT' && isDocumentFile)
 
         if (needsFile && file && file.size > 0) {
-            // Limit file size to 5MB for DB storage
-            if (file.size > 5 * 1024 * 1024) {
-                return { success: false, error: "El archivo es demasiado grande. Máximo 5MB para almacenamiento interno." }
+            // Limit file size to 20MB for DB storage (adjusted for server actions limit)
+            if (file.size > 20 * 1024 * 1024) {
+                return { success: false, error: "El archivo es demasiado grande. Máximo 20MB." }
             }
 
             const bytes = await file.arrayBuffer()

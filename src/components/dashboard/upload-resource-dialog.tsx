@@ -225,7 +225,7 @@ export function UploadResourceDialog({ defaultType, triggerText }: { defaultType
                                             getAcceptTypes(type)
                                 }
                             />
-                            <p className="text-xs text-muted-foreground">Admite: PDF, Word, Excel, HTML, Imágenes. (Max 5MB).</p>
+                            <p className="text-xs text-muted-foreground">Admite: PDF, Word, Excel, HTML, Imágenes. (Max 20MB).</p>
                         </div>
                     )}
 
