@@ -128,6 +128,7 @@ export function StartExamDialog({ examId, attempt, startWindow, endWindow, claim
                             id="terms"
                             checked={agreed}
                             onCheckedChange={(c) => setAgreed(c as boolean)}
+                            disabled={new Date() < new Date(startWindow)}
                         />
                         <label
                             htmlFor="terms"
@@ -136,9 +137,15 @@ export function StartExamDialog({ examId, attempt, startWindow, endWindow, claim
                             He leído y comprendido las indicaciones.
                         </label>
                     </div>
-                    <Button onClick={handleStart} disabled={!agreed || isLoading}>
-                        {isLoading ? "Iniciando..." : "Comenzar Examen"}
-                    </Button>
+                    {new Date() < new Date(startWindow) ? (
+                        <Button disabled variant="secondary">
+                            Habilitado a las {formatTime(new Date(startWindow))}
+                        </Button>
+                    ) : (
+                        <Button onClick={handleStart} disabled={!agreed || isLoading}>
+                            {isLoading ? "Iniciando..." : "Comenzar Examen"}
+                        </Button>
+                    )}
                 </DialogFooter>
             </DialogContent>
         </Dialog>

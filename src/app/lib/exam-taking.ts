@@ -41,6 +41,14 @@ export async function startExam(examId: string) {
     const exam = await prisma.exam.findUnique({ where: { id: examId } })
     if (!exam) return { success: false, error: "Examen no encontrado" }
 
+    const now = new Date()
+    if (now < exam.start_window) {
+        return { success: false, error: "El examen aún no ha comenzado." }
+    }
+    if (now > exam.end_window) {
+        return { success: false, error: "El periodo del examen ha finalizado." }
+    }
+
     // Check for Personalized Profile
     const profile = await prisma.examProfile.findUnique({
         where: {
