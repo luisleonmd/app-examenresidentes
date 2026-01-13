@@ -24,7 +24,7 @@ export async function exportExamResults(examId: string, format: 'xlsx' | 'csv' =
                             select: { nombre: true, cedula: true }
                         }
                     },
-                    orderBy: { finished_at: 'desc' }
+                    orderBy: { end_time: 'desc' }
                 }
             }
         })
@@ -34,54 +34,22 @@ export async function exportExamResults(examId: string, format: 'xlsx' | 'csv' =
         }
 
         // Prepare data
-        const data = exam.attempts.map(attempt => ({
+        const data = exam.attempts.map((attempt: any) => ({
             'Estudiante': attempt.user.nombre,
             'Cédula': attempt.user.cedula,
-            'Fecha': attempt.finished_at?.toLocaleDateString('es-ES') || '',
-            'Hora': attempt.finished_at?.toLocaleTimeString('es-ES') || '',
+            'Fecha': attempt.end_time?.toLocaleDateString('es-ES') || '',
+            'Hora': attempt.end_time?.toLocaleTimeString('es-ES') || '',
             'Calificación': `${attempt.score}%`,
             'Estado': attempt.status === 'COMPLETED' ? 'Completado' : 'En progreso'
         }))
 
-        // Create workbook
-        const ws = XLSX.utils.json_to_sheet(data)
-        const wb = XLSX.utils.book_new()
-        XLSX.utils.book_append_sheet(wb, ws, "Resultados")
+        // ...
 
-        // Generate file
-        const fileBuffer = format === 'xlsx'
-            ? XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' })
-            : XLSX.write(wb, { type: 'buffer', bookType: 'csv' })
-
-        const base64 = Buffer.from(fileBuffer).toString('base64')
-        const filename = `resultados_${exam.title.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.${format}`
-
-        return {
-            success: true,
-            file: base64,
-            filename,
-            mimeType: format === 'xlsx'
-                ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-                : 'text/csv'
-        }
-    } catch (error) {
-        console.error("Export error:", error)
-        return { success: false, error: "Failed to export data" }
-    }
-}
-
-export async function exportStudentGrades(format: 'xlsx' | 'csv' = 'xlsx') {
-    const session = await auth()
-    if (!session?.user || session.user.role !== 'COORDINADOR') {
-        return { success: false, error: "Unauthorized" }
-    }
-
-    try {
         // Fetch all students with their attempts
         const students = await prisma.user.findMany({
             where: { role: 'RESIDENTE' },
             include: {
-                exam_attempts: {
+                attempts: {
                     where: { status: 'COMPLETED' },
                     select: { score: true }
                 }
@@ -90,10 +58,10 @@ export async function exportStudentGrades(format: 'xlsx' | 'csv' = 'xlsx') {
         })
 
         // Calculate statistics
-        const data = students.map(student => {
-            const scores = student.exam_attempts.map(a => a.score || 0)
+        const gradesData = students.map(student => {
+            const scores = student.attempts.map((a: any) => a.score || 0)
             const avg = scores.length > 0
-                ? scores.reduce((sum, s) => sum + s, 0) / scores.length
+                ? scores.reduce((sum: number, s: number) => sum + s, 0) / scores.length
                 : 0
             const max = scores.length > 0 ? Math.max(...scores) : 0
             const min = scores.length > 0 ? Math.min(...scores) : 0
@@ -109,7 +77,7 @@ export async function exportStudentGrades(format: 'xlsx' | 'csv' = 'xlsx') {
         })
 
         // Create workbook
-        const ws = XLSX.utils.json_to_sheet(data)
+        const ws = XLSX.utils.json_to_sheet(gradesData)
         const wb = XLSX.utils.book_new()
         XLSX.utils.book_append_sheet(wb, ws, "Calificaciones")
 
