@@ -82,6 +82,20 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         textAlign: 'center',
     },
+    signatureBox: {
+        marginTop: 60,
+        alignItems: 'center',
+    },
+    signatureLine: {
+        width: 250,
+        borderBottom: '1 solid #000',
+        marginBottom: 8,
+    },
+    signatureText: {
+        fontSize: 10,
+        color: '#333',
+        fontWeight: 'bold',
+    },
     footer: {
         position: 'absolute',
         bottom: 30,
@@ -167,7 +181,7 @@ export const ExamReportTemplate: React.FC<ExamReportProps> = ({
                     </View>
                     {exam.course && (
                         <View style={styles.infoRow}>
-                            <Text style={styles.label}>Curso:</Text>
+                            <Text style={styles.label}>Rotación/Curso:</Text>
                             <Text style={styles.value}>{exam.course.name}</Text>
                         </View>
                     )}
@@ -213,6 +227,15 @@ export const ExamReportTemplate: React.FC<ExamReportProps> = ({
                             })}
                         </View>
                     ))}
+                </View>
+
+                {/* Signature Section */}
+                <View style={styles.signatureBox} wrap={false}>
+                    <View style={styles.signatureLine} />
+                    <Text style={styles.signatureText}>Firma Digital del Profesor / Coordinador</Text>
+                    <Text style={{ fontSize: 8, color: '#666', marginTop: 2 }}>
+                        Certificación de validez académica
+                    </Text>
                 </View>
 
                 {/* Footer */}
