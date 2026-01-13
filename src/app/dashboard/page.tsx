@@ -33,9 +33,22 @@ export default async function DashboardPage() {
 
     return (
         <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold">Dashboard</h1>
-                <p className="text-muted-foreground">Bienvenido, {session.user.nombre}</p>
+            <div className="flex flex-col gap-2 border-b pb-6">
+                <h1 className="text-2xl md:text-3xl font-bold text-primary">
+                    Entorno para Evaluación de Residentes de Medicina Familiar y Comunitaria
+                </h1>
+                <h2 className="text-xl text-muted-foreground font-medium">
+                    Universidad de Costa Rica
+                </h2>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                    <Calendar className="h-4 w-4" />
+                    <span className="capitalize">
+                        {new Date().toLocaleDateString('es-CR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                    </span>
+                </div>
+                <p className="mt-4 text-base text-gray-600 dark:text-gray-300 max-w-4xl">
+                    Bienvenido, {session.user.nombre}. Esta plataforma tiene como objetivo principal la evaluación de los conocimientos adquiridos en las rotaciones y cursos del periodo evaluado. Utilice este entorno para gestionar y realizar evaluaciones, acceder a recursos de apoyo y consultar su rendimiento académico.
+                </p>
             </div>
 
             {/* Statistics Cards */}
