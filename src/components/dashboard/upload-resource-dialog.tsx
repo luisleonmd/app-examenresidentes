@@ -28,6 +28,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 export function UploadResourceDialog({ defaultType, triggerText }: { defaultType?: string, triggerText?: string }) {
     const [open, setOpen] = useState(false)
     const [type, setType] = useState(defaultType || "LINK")
+    // State to toggle between Link and File input when defaultType is "LINK" (used for Temario)
+    const [isLinkFile, setIsLinkFile] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const [result, setResult] = useState<{ success: boolean, error?: string } | null>(null)
 
@@ -37,7 +39,35 @@ export function UploadResourceDialog({ defaultType, triggerText }: { defaultType
         setResult(null)
 
         const formData = new FormData(event.currentTarget)
-        formData.set('type', type)
+        // If it's a "LINK" type but user chose to upload a file, we treat it as a DOCUMENT (or just store file)
+        // But for categorization purposes, if the user clicked "Temario" (LINK), we want it to show up there.
+        // The current backend uses 'type' to filter. 
+        // If we want it to show up in the "Temario" section (which filters by LINK), we might need to change backend or filtering.
+        // EASIER: If isLinkFile is true, we submit as "SYLLABUS" (new type) or "DOCUMENT" but instruct user.
+        // Let's rely on the SECTION to determine display. 
+        // We will submit 'LINK' type but if it has a file, backend handles it? 
+        // Currently backend: if type !== 'LINK' requires file. If type === 'LINK' requires url.
+        // We need to change the submitted type if it's a file upload for Temario.
+        // Let's use 'DOCUMENT' if they upload a file, even if they started in "Temario".
+        // BUT then it will appear in "Documentos" section.
+        // User wants it to appear in "Temario" section.
+        // So we should use a new type 'SYLLABUS' for everything in that card?
+        // OR simply allow 'LINK' type to have a file in backend.
+
+        // Let's modify the filtering logic in frontend later. For now let's use 'SYLLABUS' if it's for the temario card.
+        // If defaultType is LINK (Temario card), we can allow switching to SYLLABUS_FILE or SYLLABUS_LINK.
+
+        let initialType = type
+        if (defaultType === 'LINK') {
+            // If user wants to upload a file in Temario section
+            if (isLinkFile) {
+                formData.set('type', 'SYLLABUS_FILE')
+            } else {
+                formData.set('type', 'SYLLABUS_LINK')
+            }
+        } else {
+            formData.set('type', type)
+        }
 
         const res = await createResource(formData)
         setResult(res)
@@ -78,6 +108,35 @@ export function UploadResourceDialog({ defaultType, triggerText }: { defaultType
                         <Input id="title" name="title" required placeholder="Ej: Temario 2026 o Cronograma" />
                     </div>
 
+                    {/* Toggle for Temario Section */}
+                    {defaultType === 'LINK' && (
+                        <div className="flex items-center space-x-4 mb-2">
+                            <Label className="text-sm text-muted-foreground">Formato:</Label>
+                            <div className="flex items-center space-x-2">
+                                <input
+                                    type="radio"
+                                    id="mode-link"
+                                    name="mode"
+                                    checked={!isLinkFile}
+                                    onChange={() => setIsLinkFile(false)}
+                                    className="accent-primary"
+                                />
+                                <label htmlFor="mode-link" className="text-sm cursor-pointer">Enlace URL</label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <input
+                                    type="radio"
+                                    id="mode-file"
+                                    name="mode"
+                                    checked={isLinkFile}
+                                    onChange={() => setIsLinkFile(true)}
+                                    className="accent-primary"
+                                />
+                                <label htmlFor="mode-file" className="text-sm cursor-pointer">Archivo (PDF/Word/Excel)</label>
+                            </div>
+                        </div>
+                    )}
+
                     {!defaultType && (
                         <div className="grid gap-2">
                             <Label htmlFor="type">Tipo de Recurso</Label>
@@ -94,7 +153,7 @@ export function UploadResourceDialog({ defaultType, triggerText }: { defaultType
                         </div>
                     )}
 
-                    {type === "LINK" ? (
+                    {(type === "LINK" && !isLinkFile) ? (
                         <div className="grid gap-2">
                             <Label htmlFor="url">URL del Enlace</Label>
                             <Input id="url" name="url" required placeholder="https://..." type="url" />
@@ -102,7 +161,13 @@ export function UploadResourceDialog({ defaultType, triggerText }: { defaultType
                     ) : (
                         <div className="grid gap-2">
                             <Label htmlFor="file">Archivo</Label>
-                            <Input id="file" name="file" type="file" required accept={getAcceptTypes(type)} />
+                            <Input
+                                id="file"
+                                name="file"
+                                type="file"
+                                required
+                                accept={isLinkFile ? ".pdf,.doc,.docx,.xls,.xlsx,.html,.htm,.png,.jpg,.jpeg" : getAcceptTypes(type)}
+                            />
                             <p className="text-xs text-muted-foreground">Admite: PDF, Word, Excel, HTML, Imágenes. (Max 5MB).</p>
                         </div>
                     )}

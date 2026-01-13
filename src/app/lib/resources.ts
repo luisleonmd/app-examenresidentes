@@ -17,14 +17,26 @@ export async function createResource(formData: FormData) {
     try {
         const title = formData.get('title') as string
         const description = formData.get('description') as string
-        const type = formData.get('type') as ResourceType
+        let type = formData.get('type') as string // Allow string to accept custom types
         const url = formData.get('url') as string
         const file = formData.get('file') as File | null
 
         let fileData = null
         let fileType = null
+        let isSyllabusFile = false
 
-        if (type !== 'LINK' && file && file.size > 0) {
+        // Handle the custom "SYLLABUS" types from frontend
+        if (type === 'SYLLABUS_FILE') {
+            type = 'LINK' // Store as LINK so it shows in Temario section
+            isSyllabusFile = true
+        } else if (type === 'SYLLABUS_LINK') {
+            type = 'LINK'
+        }
+
+        // Logic for file processing
+        const needsFile = (type !== 'LINK' && type !== 'ROTATION_IMAGE') || isSyllabusFile
+
+        if (needsFile && file && file.size > 0) {
             // Limit file size to 5MB for DB storage
             if (file.size > 5 * 1024 * 1024) {
                 return { success: false, error: "El archivo es demasiado grande. Máximo 5MB para almacenamiento interno." }
@@ -36,7 +48,9 @@ export async function createResource(formData: FormData) {
             fileType = file.type
         }
 
-        if (type === 'LINK' && !url) {
+        // Logic for URL validation
+        // Require URL only if it is a LINK/SYLLABUS_LINK and NOT a file upload
+        if (type === 'LINK' && !isSyllabusFile && !url) {
             return { success: false, error: "La URL es requerida para enlaces." }
         }
 
@@ -44,8 +58,8 @@ export async function createResource(formData: FormData) {
             data: {
                 title,
                 description,
-                type,
-                url: type === 'LINK' ? url : null,
+                type: type as ResourceType,
+                url: (type === 'LINK' && !isSyllabusFile) ? url : null,
                 file_data: fileData,
                 file_type: fileType
             }

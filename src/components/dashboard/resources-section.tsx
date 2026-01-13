@@ -134,9 +134,22 @@ export function ResourcesSection({ resources, userRole }: { resources: any[], us
                                 {LINKS.map((link) => (
                                     <li key={link.id} className="flex items-start justify-between p-2 rounded hover:bg-muted/50 transition-colors border">
                                         <div className="space-y-1 min-w-0">
-                                            <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium leading-none truncate pr-2 hover:underline text-blue-600 dark:text-blue-400">
-                                                {link.title}
-                                            </a>
+                                            {link.url ? (
+                                                <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium leading-none truncate pr-2 hover:underline text-blue-600 dark:text-blue-400">
+                                                    {link.title}
+                                                </a>
+                                            ) : (
+                                                <div className="flex items-center gap-1">
+                                                    <a
+                                                        href={`data:${link.file_type};base64,${link.file_data}`}
+                                                        download={link.title}
+                                                        className="text-sm font-medium leading-none truncate pr-2 hover:underline text-blue-600 dark:text-blue-400"
+                                                    >
+                                                        {link.title}
+                                                    </a>
+                                                    <Download className="h-3 w-3 text-muted-foreground" />
+                                                </div>
+                                            )}
                                             <p className="text-xs text-muted-foreground">{link.description}</p>
                                         </div>
                                         {(userRole === 'COORDINADOR' || userRole === 'PROFESOR') && (
