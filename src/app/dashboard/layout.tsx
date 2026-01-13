@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator"
 import { auth, signOut } from "@/auth"
 import { SearchButton } from "@/components/search-button"
 import { NotificationsBell } from "@/components/notifications-bell"
+import { ChangePasswordDialog } from "@/components/change-password-dialog"
 
 export default async function DashboardLayout({
     children,
@@ -29,6 +30,7 @@ export default async function DashboardLayout({
                         <SearchButton />
                         <NotificationsBell />
                         <span className="text-sm font-medium">{session?.user?.nombre}</span>
+                        <ChangePasswordDialog />
                         <form
                             action={async () => {
                                 "use server"
