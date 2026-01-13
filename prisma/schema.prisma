@@ -171,3 +171,14 @@ model Notification {
   read       Boolean  @default(false)
   created_at DateTime @default(now())
 }
+
+model StudyResource {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  type        String   // DOCUMENT, LINK, ROTATION_IMAGE
+  url         String?  // For external links
+  file_data   String?  // Base64 encoded file data for persistence (limit size in UI)
+  file_type   String?  // Mime type
+  created_at  DateTime @default(now())
+}

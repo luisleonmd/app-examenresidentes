@@ -8,6 +8,9 @@ import { BookOpen, Users, FileQuestion, TrendingUp, Calendar, Award } from "luci
 
 export const dynamic = 'force-dynamic'
 
+import { getResources } from "@/app/lib/resources"
+import { ResourcesSection } from "@/components/dashboard/resources-section"
+
 export default async function DashboardPage() {
     const session = await auth()
 
@@ -15,10 +18,11 @@ export default async function DashboardPage() {
         redirect("/login")
     }
 
-    const [statsResult, performanceResult, activityResult] = await Promise.all([
+    const [statsResult, performanceResult, activityResult, resources] = await Promise.all([
         getDashboardStats(),
         getPerformanceData(),
-        getRecentActivity()
+        getRecentActivity(),
+        getResources()
     ])
 
     const stats = statsResult.success ? statsResult.stats : null
@@ -109,6 +113,8 @@ export default async function DashboardPage() {
                     />
                 </div>
             )}
+
+            <ResourcesSection resources={resources} userRole={role} />
 
             {/* Performance Chart */}
             <div className="grid gap-4 md:grid-cols-2">
