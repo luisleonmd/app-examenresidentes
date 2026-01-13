@@ -63,16 +63,17 @@ export function ResourcesSection({ resources, userRole }: { resources: any[], us
                     </CardContent>
                 </Card>
 
-                {/* Documents Section */}
+
+                {/* Documents / Support Material Section */}
                 <Card className="col-span-full md:col-span-1 lg:col-span-1">
                     <CardHeader>
                         <div className="flex items-center justify-between">
                             <div className="space-y-1">
                                 <CardTitle className="flex items-center gap-2">
                                     <FileText className="h-5 w-5 text-blue-500" />
-                                    Documentos de Apoyo
+                                    Material de ayuda para las evaluaciones
                                 </CardTitle>
-                                <CardDescription>Material de estudio y guías</CardDescription>
+                                <CardDescription>Recursos de apoyo por rotación</CardDescription>
                             </div>
                             {(userRole === 'COORDINADOR' || userRole === 'PROFESOR') && (
                                 <UploadResourceDialog defaultType="DOCUMENT" triggerText="AGREGAR" />
@@ -83,29 +84,65 @@ export function ResourcesSection({ resources, userRole }: { resources: any[], us
                         {DOCUMENTS.length === 0 ? (
                             <p className="text-sm text-muted-foreground text-center py-4">No hay documentos disponibles.</p>
                         ) : (
-                            <ul className="space-y-3">
-                                {DOCUMENTS.map((doc) => (
-                                    <li key={doc.id} className="flex items-start justify-between p-2 rounded hover:bg-muted/50 transition-colors border">
-                                        <div className="space-y-1 min-w-0">
-                                            <p className="text-sm font-medium leading-none truncate pr-2">{doc.title}</p>
-                                            <p className="text-xs text-muted-foreground">{doc.description}</p>
-                                        </div>
-                                        <div className="flex gap-2 shrink-0">
-                                            <a
-                                                href={`data:${doc.file_type};base64,${doc.file_data}`}
-                                                download={doc.title} // Specify filename
-                                                className="text-blue-500 hover:text-blue-700"
-                                                title="Descargar"
-                                            >
-                                                <Download className="h-4 w-4" />
-                                            </a>
+                            <div className="space-y-2">
+                                {DOCUMENTS.map((doc) => {
+                                    // Determine icon based on file type or if it's a URL
+                                    // If doc.url exists, it's a link (or we treat as web resource)
+                                    // If doc.file_data exists, it's a file
+
+                                    const isLink = !!doc.url;
+                                    const isImage = doc.file_type?.startsWith('image/');
+
+                                    return (
+                                        <div key={doc.id} className="flex items-center justify-between group p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded transition-colors">
+                                            <div className="flex items-center gap-3 overflow-hidden">
+                                                {/* Icon */}
+                                                <div className="shrink-0 text-sky-600">
+                                                    {isLink ? (
+                                                        <ExternalLink className="h-5 w-5" />
+                                                    ) : isImage ? (
+                                                        <ImageIcon className="h-5 w-5" />
+                                                    ) : (
+                                                        // Folder icon style from Moodle
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            viewBox="0 0 24 24"
+                                                            fill="currentColor"
+                                                            className="w-8 h-8 text-sky-500"
+                                                        >
+                                                            <path d="M19.5 21a3 3 0 0 0 3-3v-4.5a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h15ZM1.5 10.146V6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 9h-15a4.483 4.483 0 0 0-3 1.146Z" />
+                                                        </svg>
+                                                    )}
+                                                </div>
+
+                                                {/* Content */}
+                                                <div className="flex flex-col min-w-0">
+                                                    {isLink ? (
+                                                        <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-base text-blue-700 dark:text-blue-400 hover:underline font-medium truncate">
+                                                            {doc.title}
+                                                        </a>
+                                                    ) : (
+                                                        <a
+                                                            href={`data:${doc.file_type};base64,${doc.file_data}`}
+                                                            download={doc.title}
+                                                            className="text-base text-blue-700 dark:text-blue-400 hover:underline font-medium truncate"
+                                                        >
+                                                            {doc.title}
+                                                        </a>
+                                                    )}
+                                                    {/* Hidden description for now to match screenshot clean look, or show as tooltip? 
+                                                    User reference shows just title. Let's keep it simple.
+                                                */}
+                                                </div>
+                                            </div>
+
                                             {(userRole === 'COORDINADOR' || userRole === 'PROFESOR') && (
                                                 <DeleteButton id={doc.id} />
                                             )}
                                         </div>
-                                    </li>
-                                ))}
-                            </ul>
+                                    )
+                                })}
+                            </div>
                         )}
                     </CardContent>
                 </Card>

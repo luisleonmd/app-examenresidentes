@@ -65,6 +65,20 @@ export function UploadResourceDialog({ defaultType, triggerText }: { defaultType
             } else {
                 formData.set('type', 'SYLLABUS_LINK')
             }
+        } else if (defaultType === 'DOCUMENT') {
+            // For Support Material (Documentos de Apoyo)
+            // If isLinkFile is true, it means they chose "Enlace / Web", so we send DOCUMENT_LINK
+            // If isLinkFile is false (default), it's a file, so DOCUMENT_FILE
+            // NOTE: Variable name isLinkFile is confusing here because for DOCUMENT, "File" mode is default (isLinkFile=false).
+            // And "Link" mode means isLinkFile=true.
+            // Let's check the JSX toggles below to be sure.
+            // Toggle DOCUMENT: checked={isLinkFile} onChange={() => setIsLinkFile(true)} -> Label: "Enlace / Web"
+            // So isLinkFile=true IS A LINK.
+            if (isLinkFile) {
+                formData.set('type', 'DOCUMENT_LINK')
+            } else {
+                formData.set('type', 'DOCUMENT_FILE')
+            }
         } else {
             formData.set('type', type)
         }
@@ -137,6 +151,35 @@ export function UploadResourceDialog({ defaultType, triggerText }: { defaultType
                         </div>
                     )}
 
+                    {/* Toggle for Documentos de Apoyo Section (Allowing Links now too) */}
+                    {defaultType === 'DOCUMENT' && (
+                        <div className="flex items-center space-x-4 mb-2">
+                            <Label className="text-sm text-muted-foreground">Formato:</Label>
+                            <div className="flex items-center space-x-2">
+                                <input
+                                    type="radio"
+                                    id="doc-mode-file"
+                                    name="doc-mode"
+                                    checked={!isLinkFile} // Reuse state variable, slightly confusing name but functional since only one dialog active
+                                    onChange={() => setIsLinkFile(false)}
+                                    className="accent-primary"
+                                />
+                                <label htmlFor="doc-mode-file" className="text-sm cursor-pointer">Archivo</label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <input
+                                    type="radio"
+                                    id="doc-mode-link"
+                                    name="doc-mode"
+                                    checked={isLinkFile}
+                                    onChange={() => setIsLinkFile(true)}
+                                    className="accent-primary"
+                                />
+                                <label htmlFor="doc-mode-link" className="text-sm cursor-pointer">Enlace / Web</label>
+                            </div>
+                        </div>
+                    )}
+
                     {!defaultType && (
                         <div className="grid gap-2">
                             <Label htmlFor="type">Tipo de Recurso</Label>
@@ -153,7 +196,17 @@ export function UploadResourceDialog({ defaultType, triggerText }: { defaultType
                         </div>
                     )}
 
-                    {(type === "LINK" && !isLinkFile) ? (
+                    {/* Rendering Logic:
+                        If LINK type: 
+                            - default is URL (!isLinkFile)
+                            - can be FILE (isLinkFile) -> SYLLABUS_FILE
+                        
+                        If DOCUMENT type:
+                            - default is FILE (!isLinkFile) -> DOCUMENT_FILE (or default)
+                            - can be URL (isLinkFile) -> DOCUMENT_LINK
+                    */}
+
+                    {((type === "LINK" && !isLinkFile) || (type === "DOCUMENT" && isLinkFile)) ? (
                         <div className="grid gap-2">
                             <Label htmlFor="url">URL del Enlace</Label>
                             <Input id="url" name="url" required placeholder="https://..." type="url" />
@@ -166,7 +219,11 @@ export function UploadResourceDialog({ defaultType, triggerText }: { defaultType
                                 name="file"
                                 type="file"
                                 required
-                                accept={isLinkFile ? ".pdf,.doc,.docx,.xls,.xlsx,.html,.htm,.png,.jpg,.jpeg" : getAcceptTypes(type)}
+                                accept={
+                                    type === 'DOCUMENT' ? ".pdf,.doc,.docx,.xls,.xlsx,.html,.htm,.png,.jpg,.jpeg,.gif" :
+                                        (isLinkFile && type === 'LINK') ? ".pdf,.doc,.docx,.xls,.xlsx,.html,.htm,.png,.jpg,.jpeg" :
+                                            getAcceptTypes(type)
+                                }
                             />
                             <p className="text-xs text-muted-foreground">Admite: PDF, Word, Excel, HTML, Imágenes. (Max 5MB).</p>
                         </div>

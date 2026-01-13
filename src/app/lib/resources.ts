@@ -33,8 +33,25 @@ export async function createResource(formData: FormData) {
             type = 'LINK'
         }
 
+        // Handle custom "DOCUMENT" types (File vs Link mode for Support Material)
+        let isDocumentFile = true // Default to true for backward compatibility
+        if (type === 'DOCUMENT_FILE') {
+            type = 'DOCUMENT'
+            isDocumentFile = true
+        } else if (type === 'DOCUMENT_LINK') {
+            type = 'DOCUMENT'
+            isDocumentFile = false
+        }
+
         // Logic for file processing
-        const needsFile = (type !== 'LINK' && type !== 'ROTATION_IMAGE') || isSyllabusFile
+        // We need a file if:
+        // 1. It is ROTATION_IMAGE
+        // 2. It is SYLLABUS_FILE (Temario File)
+        // 3. It is DOCUMENT (standard) AND it is flagged as a file (isDocumentFile)
+
+        const needsFile = type === 'ROTATION_IMAGE' ||
+            isSyllabusFile ||
+            (type === 'DOCUMENT' && isDocumentFile)
 
         if (needsFile && file && file.size > 0) {
             // Limit file size to 5MB for DB storage
@@ -49,8 +66,14 @@ export async function createResource(formData: FormData) {
         }
 
         // Logic for URL validation
-        // Require URL only if it is a LINK/SYLLABUS_LINK and NOT a file upload
-        if (type === 'LINK' && !isSyllabusFile && !url) {
+        // Require URL if:
+        // 1. It is LINK (Temario) AND NOT a file upload
+        // 2. It is DOCUMENT (Support) AND NOT a file upload (Link mode)
+
+        const needsUrl = (type === 'LINK' && !isSyllabusFile) ||
+            (type === 'DOCUMENT' && !isDocumentFile)
+
+        if (needsUrl && !url) {
             return { success: false, error: "La URL es requerida para enlaces." }
         }
 
@@ -59,7 +82,7 @@ export async function createResource(formData: FormData) {
                 title,
                 description,
                 type: type as ResourceType,
-                url: (type === 'LINK' && !isSyllabusFile) ? url : null,
+                url: needsUrl ? url : null,
                 file_data: fileData,
                 file_type: fileType
             }
