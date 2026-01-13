@@ -11,7 +11,7 @@ import {
 import { auth } from "@/auth"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
-import { StartExamButton } from "./start-exam-button"
+import { StartExamDialog } from "./start-exam-button"
 import Link from "next/link"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { DeleteExamButton } from "./delete-exam-button"
@@ -48,43 +48,51 @@ export default async function ExamsPage() {
                                     No hay exámenes programados.
                                 </TableCell>
                             </TableRow>
-                        ) : exams.map((exam) => (
-                            <TableRow key={exam.id}>
-                                <TableCell className="font-medium">{exam.title}</TableCell>
-                                <TableCell>
-                                    {/* @ts-ignore */}
-                                    {exam.profiles && exam.profiles.length > 0
-                                        // @ts-ignore
-                                        ? exam.profiles.map(p => p.user.nombre).join(", ")
-                                        : "General"}
-                                </TableCell>
-                                <TableCell>{exam.course?.name}</TableCell>
-                                {!isResident && <TableCell>{exam.creator.nombre}</TableCell>}
-                                <TableCell className="text-sm">
-                                    {format(exam.start_window, "dd MMM", { locale: es })} - {format(exam.end_window, "dd MMM yyyy", { locale: es })}
-                                </TableCell>
-                                <TableCell>{exam.total_questions}</TableCell>
-                                <TableCell className="text-right">
-                                    {isResident ? (
-                                        // @ts-ignore
-                                        <StartExamButton examId={exam.id} attempt={exam.userAttempt} />
-                                    ) : (
-                                        <div className="flex gap-2 justify-end">
-                                            <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold hover:bg-secondary/80">
-                                                Programado
-                                            </span>
-                                            {/* Link to results for professors */}
-                                            <Button asChild size="sm" variant="outline">
-                                                <a href={`/dashboard/exams/${exam.id}/results`}>Resultados</a>
-                                            </Button>
-                                            {session?.user?.role === 'COORDINADOR' && (
-                                                <DeleteExamButton examId={exam.id} />
-                                            )}
-                                        </div>
-                                    )}
-                                </TableCell>
-                            </TableRow>
-                        ))}
+                        ) : exams.map((e) => {
+                            const exam = e as any;
+                            return (
+                                <TableRow key={exam.id}>
+                                    <TableCell className="font-medium">{exam.title}</TableCell>
+                                    <TableCell>
+                                        {/* @ts-ignore */}
+                                        {exam.profiles && exam.profiles.length > 0
+                                            // @ts-ignore
+                                            ? exam.profiles.map(p => p.user.nombre).join(", ")
+                                            : "General"}
+                                    </TableCell>
+                                    <TableCell>{exam.course?.name}</TableCell>
+                                    {!isResident && <TableCell>{exam.creator?.nombre}</TableCell>}
+                                    <TableCell className="text-sm">
+                                        {format(new Date(exam.start_window), "dd MMM", { locale: es })} - {format(new Date(exam.end_window), "dd MMM yyyy", { locale: es })}
+                                    </TableCell>
+                                    <TableCell>{exam.total_questions}</TableCell>
+                                    <TableCell className="text-right">
+                                        {isResident ? (
+                                            <StartExamDialog
+                                                examId={exam.id}
+                                                attempt={exam.userAttempt}
+                                                startWindow={new Date(exam.start_window)}
+                                                endWindow={new Date(exam.end_window)}
+                                                claimsEnd={exam.claims_end ? new Date(exam.claims_end) : null}
+                                            />
+                                        ) : (
+                                            <div className="flex gap-2 justify-end">
+                                                <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold hover:bg-secondary/80">
+                                                    Programado
+                                                </span>
+                                                {/* Link to results for professors */}
+                                                <Button asChild size="sm" variant="outline">
+                                                    <a href={`/dashboard/exams/${exam.id}/results`}>Resultados</a>
+                                                </Button>
+                                                {session?.user?.role === 'COORDINADOR' && (
+                                                    <DeleteExamButton examId={exam.id} />
+                                                )}
+                                            </div>
+                                        )}
+                                    </TableCell>
+                                </TableRow>
+                            )
+                        })}
                     </TableBody>
                 </Table>
             </div>
