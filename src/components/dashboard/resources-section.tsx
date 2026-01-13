@@ -16,20 +16,24 @@ export function ResourcesSection({ resources, userRole }: { resources: any[], us
         <div className="space-y-6 mt-8">
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold tracking-tight">Recursos Académicos</h2>
-                {(userRole === 'COORDINADOR' || userRole === 'PROFESOR') && (
-                    <UploadResourceDialog />
-                )}
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {/* Rotations Section */}
                 <Card className="col-span-full lg:col-span-1">
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <ImageIcon className="h-5 w-5 text-purple-500" />
-                            Rotaciones a Evaluar
-                        </CardTitle>
-                        <CardDescription>Cronograma y asignaciones visuales</CardDescription>
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-1">
+                                <CardTitle className="flex items-center gap-2">
+                                    <ImageIcon className="h-5 w-5 text-purple-500" />
+                                    Rotaciones a Evaluar
+                                </CardTitle>
+                                <CardDescription>Cronograma y asignaciones visuales</CardDescription>
+                            </div>
+                            {(userRole === 'COORDINADOR' || userRole === 'PROFESOR') && (
+                                <UploadResourceDialog defaultType="ROTATION_IMAGE" triggerText="AGREGAR" />
+                            )}
+                        </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         {ROTATION_IMAGES.length === 0 ? (
@@ -62,11 +66,18 @@ export function ResourcesSection({ resources, userRole }: { resources: any[], us
                 {/* Documents Section */}
                 <Card className="col-span-full md:col-span-1 lg:col-span-1">
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <FileText className="h-5 w-5 text-blue-500" />
-                            Documentos de Apoyo
-                        </CardTitle>
-                        <CardDescription>Material de estudio y guías</CardDescription>
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-1">
+                                <CardTitle className="flex items-center gap-2">
+                                    <FileText className="h-5 w-5 text-blue-500" />
+                                    Documentos de Apoyo
+                                </CardTitle>
+                                <CardDescription>Material de estudio y guías</CardDescription>
+                            </div>
+                            {(userRole === 'COORDINADOR' || userRole === 'PROFESOR') && (
+                                <UploadResourceDialog defaultType="DOCUMENT" triggerText="AGREGAR" />
+                            )}
+                        </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         {DOCUMENTS.length === 0 ? (
@@ -102,11 +113,18 @@ export function ResourcesSection({ resources, userRole }: { resources: any[], us
                 {/* Links / Temario Section */}
                 <Card className="col-span-full md:col-span-1 lg:col-span-1">
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <ExternalLink className="h-5 w-5 text-orange-500" />
-                            Temario de Rotaciones
-                        </CardTitle>
-                        <CardDescription>Accesos rápidos a recursos externos</CardDescription>
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-1">
+                                <CardTitle className="flex items-center gap-2">
+                                    <ExternalLink className="h-5 w-5 text-orange-500" />
+                                    Temario de Rotaciones
+                                </CardTitle>
+                                <CardDescription>Accesos rápidos y enlaces</CardDescription>
+                            </div>
+                            {(userRole === 'COORDINADOR' || userRole === 'PROFESOR') && (
+                                <UploadResourceDialog defaultType="LINK" triggerText="AGREGAR" />
+                            )}
+                        </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         {LINKS.length === 0 ? (

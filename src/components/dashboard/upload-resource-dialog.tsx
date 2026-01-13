@@ -25,9 +25,9 @@ import { createResource } from "@/app/lib/resources"
 import { Loader2, Plus } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
-export function UploadResourceDialog() {
+export function UploadResourceDialog({ defaultType, triggerText }: { defaultType?: string, triggerText?: string }) {
     const [open, setOpen] = useState(false)
-    const [type, setType] = useState("LINK")
+    const [type, setType] = useState(defaultType || "LINK")
     const [isLoading, setIsLoading] = useState(false)
     const [result, setResult] = useState<{ success: boolean, error?: string } | null>(null)
 
@@ -48,12 +48,21 @@ export function UploadResourceDialog() {
         }
     }
 
+    // Function to get accepted file types
+    const getAcceptTypes = (t: string) => {
+        switch (t) {
+            case 'ROTATION_IMAGE': return "image/*";
+            case 'DOCUMENT': return ".pdf,.doc,.docx,.xls,.xlsx,.html,.htm"; // Added Excel and HTML
+            default: return "*";
+        }
+    }
+
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button size="sm" className="gap-2">
+                <Button size="sm" variant={defaultType ? "ghost" : "default"} className="gap-2">
                     <Plus className="h-4 w-4" />
-                    Agregar Recurso
+                    {triggerText || "Agregar Recurso"}
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
@@ -69,19 +78,21 @@ export function UploadResourceDialog() {
                         <Input id="title" name="title" required placeholder="Ej: Temario 2026 o Cronograma" />
                     </div>
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="type">Tipo de Recurso</Label>
-                        <Select value={type} onValueChange={setType}>
-                            <SelectTrigger>
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="ROTATION_IMAGE">Rotaciones (Imagen)</SelectItem>
-                                <SelectItem value="DOCUMENT">Documentos (PDF/Word)</SelectItem>
-                                <SelectItem value="LINK">Temario / Enlaces</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
+                    {!defaultType && (
+                        <div className="grid gap-2">
+                            <Label htmlFor="type">Tipo de Recurso</Label>
+                            <Select value={type} onValueChange={setType}>
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="ROTATION_IMAGE">Rotaciones (Imagen)</SelectItem>
+                                    <SelectItem value="DOCUMENT">Documentos (PDF/Word/Excel)</SelectItem>
+                                    <SelectItem value="LINK">Temario / Enlaces</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    )}
 
                     {type === "LINK" ? (
                         <div className="grid gap-2">
@@ -91,8 +102,8 @@ export function UploadResourceDialog() {
                     ) : (
                         <div className="grid gap-2">
                             <Label htmlFor="file">Archivo</Label>
-                            <Input id="file" name="file" type="file" required accept={type === 'ROTATION_IMAGE' ? "image/*" : ".pdf,.doc,.docx"} />
-                            <p className="text-xs text-muted-foreground">Nota: El archivo se guardará en la base de datos (Max 5MB).</p>
+                            <Input id="file" name="file" type="file" required accept={getAcceptTypes(type)} />
+                            <p className="text-xs text-muted-foreground">Admite: PDF, Word, Excel, HTML, Imágenes. (Max 5MB).</p>
                         </div>
                     )}
 
