@@ -1,0 +1,173 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums replaced by Strings for SQLite compatibility (maintained for Postgres for simplicity)
+
+model User {
+  id                String       @id @default(uuid())
+  cedula            String       @unique
+  nombre            String
+  role              String       // COORDINADOR, PROFESOR, RESIDENTE
+  password_hash     String
+  two_factor_secret String?
+  cohort            String?      // R1, R2, R3, R4
+  active            Boolean      @default(true)
+  created_at        DateTime     @default(now())
+
+  // Relations
+  enrollments        Enrollment[]
+  created_exams      Exam[]
+  authored_questions Question[]
+  attempts           ExamAttempt[]
+  resolved_claims    Claim[]
+  exam_profiles      ExamProfile[]
+  notifications      Notification[]
+}
+
+model Course {
+  id          String       @id @default(uuid())
+  name        String
+  code        String
+  active      Boolean      @default(true)
+  enrollments Enrollment[]
+  exams       Exam[]
+}
+
+model Enrollment {
+  id        String @id @default(uuid())
+  user_id   String
+  course_id String
+  term      String
+  user      User   @relation(fields: [user_id], references: [id])
+  course    Course @relation(fields: [course_id], references: [id])
+}
+
+model QuestionCategory {
+  id          String     @id @default(uuid())
+  name        String
+  description String?
+  questions   Question[]
+}
+
+model Question {
+  id                 String           @id @default(uuid())
+  version            Int              @default(1)
+  parent_question_id String?
+  parent_question    Question?        @relation("QuestionHistory", fields: [parent_question_id], references: [id])
+  child_questions    Question[]       @relation("QuestionHistory")
+  text               String // Markdown supported
+  image_url          String? // URL to image
+  explanation        String? // Why the correct answer is correct
+  options            String // JSON stringified: [{id: string, text: string, is_correct: boolean}]
+  category_id        String
+  category           QuestionCategory @relation(fields: [category_id], references: [id])
+  author_id          String
+  author             User             @relation(fields: [author_id], references: [id])
+  status             String // DRAFT, PUBLISHED, DEPRECATED
+  created_at         DateTime         @default(now())
+
+  answers Answer[]
+  claims  Claim[]
+}
+
+model Exam {
+  id               String   @id @default(uuid())
+  title            String
+  course_id        String?
+  course           Course?   @relation(fields: [course_id], references: [id])
+  categories       String // JSON list of Category IDs
+  created_by       String
+  creator          User     @relation(fields: [created_by], references: [id])
+  duration_minutes Int
+  start_window     DateTime
+  end_window       DateTime
+  claims_start     DateTime?
+  claims_end       DateTime?
+  total_questions  Int
+  rules            String // JSON rules
+  created_at       DateTime @default(now())
+
+  attempts ExamAttempt[]
+  profiles ExamProfile[]
+}
+
+model ExamAttempt {
+  id             String     @id @default(uuid())
+  exam_id        String
+  exam           Exam       @relation(fields: [exam_id], references: [id])
+  user_id        String
+  user           User       @relation(fields: [user_id], references: [id])
+  start_time     DateTime   @default(now())
+  end_time       DateTime?
+  score          Float?
+  status         String     // IN_PROGRESS, SUBMITTED, EXPIRED
+  pdf_report_url String?
+
+  answers Answer[]
+  claims  Claim[]
+}
+
+model Answer {
+  id                 String      @id @default(uuid())
+  attempt_id         String
+  attempt            ExamAttempt @relation(fields: [attempt_id], references: [id])
+  question_id        String
+  question           Question    @relation(fields: [question_id], references: [id])
+  selected_option_id String?
+  is_correct         Boolean
+}
+
+model Claim {
+  id               String            @id @default(uuid())
+  attempt_id       String
+  attempt          ExamAttempt       @relation(fields: [attempt_id], references: [id])
+  question_id      String
+  question         Question          @relation(fields: [question_id], references: [id])
+  justification    String
+  bibliography     String
+  status           String            // PENDING, APPROVED, REJECTED
+  resolution_notes String?
+  resolved_by      String?
+  resolver         User?             @relation(fields: [resolved_by], references: [id])
+  created_at       DateTime          @default(now())
+
+  attachments ClaimAttachment[]
+}
+
+model ClaimAttachment {
+  id        String @id @default(uuid())
+  claim_id  String
+  claim     Claim  @relation(fields: [claim_id], references: [id])
+  file_url  String
+  file_type String
+}
+
+model ExamProfile {
+  id            String   @id @default(uuid())
+  exam_id       String
+  exam          Exam     @relation(fields: [exam_id], references: [id])
+  user_id       String
+  user          User     @relation(fields: [user_id], references: [id])
+  configuration String   // JSON: [{ categoryId: string, count: number }]
+  created_at    DateTime @default(now())
+
+  @@unique([exam_id, user_id])
+}
+
+model Notification {
+  id         String   @id @default(uuid())
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  type       String   // EXAM_AVAILABLE, EXAM_ENDING, CLAIM_RESOLVED, NEW_CLAIM
+  title      String
+  message    String
+  link       String?  // Optional link to related resource
+  read       Boolean  @default(false)
+  created_at DateTime @default(now())
+}

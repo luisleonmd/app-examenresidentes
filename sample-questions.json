@@ -1,0 +1,117 @@
+[
+    {
+        "text": "¿Cuál es el tratamiento de primera línea para la hipertensión arterial no complicada según las guías ESC 2023?",
+        "explanation": "Los inhibidores de la enzima convertidora de angiotensina (IECA) o los antagonistas de los receptores de angiotensina II (ARA-II) son considerados tratamiento de primera línea para HTA no complicada según las guías europeas.",
+        "category": "Cardiología",
+        "options": [
+            {
+                "text": "IECA o ARA-II",
+                "is_correct": true
+            },
+            {
+                "text": "Beta bloqueadores",
+                "is_correct": false
+            },
+            {
+                "text": "Diuréticos tiazídicos",
+                "is_correct": false
+            },
+            {
+                "text": "Calcio antagonistas",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "text": "¿Cuál es la dosis inicial recomendada de amoxicilina para el tratamiento de faringitis estreptocócica en adultos?",
+        "explanation": "La dosis estándar de amoxicilina para faringitis estreptocócica en adultos es 500mg cada 8 horas o 1g cada 12 horas por 10 días.",
+        "category": "Medicina Familiar",
+        "options": [
+            {
+                "text": "250mg cada 8 horas",
+                "is_correct": false
+            },
+            {
+                "text": "500mg cada 8 horas",
+                "is_correct": true
+            },
+            {
+                "text": "1g cada 24 horas",
+                "is_correct": false
+            },
+            {
+                "text": "2g cada 12 horas",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "text": "¿A qué edad se debe iniciar el tamizaje de cáncer colorrectal en población de riesgo promedio?",
+        "explanation": "Las guías actuales recomiendan iniciar el tamizaje de cáncer colorrectal a los 45 años en población de riesgo promedio, habiendo disminuido de los 50 años previos.",
+        "category": "Medicina Preventiva",
+        "options": [
+            {
+                "text": "40 años",
+                "is_correct": false
+            },
+            {
+                "text": "45 años",
+                "is_correct": true
+            },
+            {
+                "text": "50 años",
+                "is_correct": false
+            },
+            {
+                "text": "55 años",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "text": "¿Cuál es el antibiótico de elección para el tratamiento de infección urinaria no complicada en mujeres embarazadas?",
+        "explanation": "La nitrofurantoína es segura en el embarazo (excepto cerca del término) y es efectiva contra los uropatógenos más comunes. La amoxicilina también es una opción, pero tiene mayor resistencia.",
+        "category": "Ginecología y Obstetricia",
+        "options": [
+            {
+                "text": "Ciprofloxacino",
+                "is_correct": false
+            },
+            {
+                "text": "Trimetoprima-sulfametoxazol",
+                "is_correct": false
+            },
+            {
+                "text": "Nitrofurantoína",
+                "is_correct": true
+            },
+            {
+                "text": "Doxiciclina",
+                "is_correct": false
+            }
+        ]
+    },
+    {
+        "text": "¿Cuál es el signo más específico de apendicitis aguda en niños?",
+        "explanation": "El dolor migratorio de región periumbilical a fosa ilíaca derecha (signo de Kocher) es el hallazgo más específico de apendicitis aguda, aunque no siempre está presente.",
+        "category": "Pediatría",
+        "options": [
+            {
+                "text": "Fiebre mayor a 38.5°C",
+                "is_correct": false
+            },
+            {
+                "text": "Vómitos persistentes",
+                "is_correct": false
+            },
+            {
+                "text": "Dolor migratorio a fosa ilíaca derecha",
+                "is_correct": true
+            },
+            {
+                "text": "Leucocitosis mayor a 15,000",
+                "is_correct": false
+            }
+        ]
+    }
+]

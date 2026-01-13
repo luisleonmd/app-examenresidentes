@@ -1,0 +1,324 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
+import { createExam, getCourses } from "@/app/lib/exams"
+import { getCategories } from "@/app/lib/questions" // Reuse this action
+import { Button } from "@/components/ui/button"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+    DialogFooter,
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+import { Checkbox } from "@/components/ui/checkbox"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Plus } from "lucide-react"
+
+const formSchema = z.object({
+    title: z.string().min(5, "El título debe tener al menos 5 caracteres"),
+    assigned_to_user_id: z.string().optional(),
+    categories: z.array(z.string()).min(1, "Seleccione al menos una categoría"),
+    duration_minutes: z.string().refine(val => !isNaN(Number(val)) && Number(val) > 0, "Debe ser un número mayor a 0"),
+    total_questions: z.string().refine(val => !isNaN(Number(val)) && Number(val) > 0, "Debe ser mayor a 0"),
+    start_window: z.string().refine(val => new Date(val).toString() !== 'Invalid Date', "Fecha inválida"),
+    end_window: z.string().refine(val => new Date(val).toString() !== 'Invalid Date', "Fecha inválida"),
+    claims_start: z.string().optional(),
+    claims_end: z.string().optional(),
+}).refine(data => new Date(data.end_window) > new Date(data.start_window), {
+    message: "La fecha final debe ser posterior a la inicial",
+    path: ["end_window"]
+})
+
+export function CreateExamDialog() {
+    const [open, setOpen] = useState(false)
+    const [residents, setResidents] = useState<any[]>([])
+    const [categories, setCategories] = useState<any[]>([])
+    const [categorySearch, setCategorySearch] = useState("")
+
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            title: "",
+            assigned_to_user_id: "all",
+            categories: [],
+            duration_minutes: "60",
+            total_questions: "20",
+            start_window: "",
+            end_window: "",
+            claims_start: "",
+            claims_end: "",
+        },
+    })
+
+    useEffect(() => {
+        // Fetch residents instead of courses
+        fetch('/api/residents').then(r => r.json()).then(setResidents).catch(() => { })
+        getCategories().then(setCategories)
+    }, [])
+
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        // Convert string dates to Date objects for server
+        const payload = {
+            ...values,
+            start_window: new Date(values.start_window),
+            end_window: new Date(values.end_window),
+            claims_start: values.claims_start ? new Date(values.claims_start) : null,
+            claims_end: values.claims_end ? new Date(values.claims_end) : null,
+        }
+
+        const result = await createExam(payload)
+        if (result.success) {
+            setOpen(false)
+            form.reset()
+        } else {
+            alert(result.error)
+        }
+    }
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                <Button className="gap-2">
+                    <Plus className="size-4" />
+                    Nuevo Examen
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[600px]">
+                <DialogHeader>
+                    <DialogTitle>Programar Examen</DialogTitle>
+                    <DialogDescription>
+                        Defina temas, duración y ventana de tiempo exacta.
+                    </DialogDescription>
+                </DialogHeader>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <FormField
+                            control={form.control}
+                            name="title"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Título del Examen</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Ej: Parcial Bloque III" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="assigned_to_user_id"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Residente</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Todos los residentes" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                <SelectItem value="all">Todos los residentes</SelectItem>
+                                                {residents.map(resident => (
+                                                    <SelectItem key={resident.id} value={resident.id}>
+                                                        {resident.nombre} - {resident.cedula}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <div className="space-y-2">
+                                <Label>Categorías de Preguntas</Label>
+                                <Input
+                                    placeholder="Buscar categoría..."
+                                    value={categorySearch}
+                                    onChange={(e) => setCategorySearch(e.target.value)}
+                                    className="mb-2"
+                                />
+                                <ScrollArea className="h-[120px] w-full border rounded-md p-2">
+                                    {categories
+                                        .filter(cat => cat.name.toLowerCase().includes(categorySearch.toLowerCase()))
+                                        .map((cat) => (
+                                            <FormField
+                                                key={cat.id}
+                                                control={form.control}
+                                                name="categories"
+                                                render={({ field }) => {
+                                                    return (
+                                                        <FormItem
+                                                            key={cat.id}
+                                                            className="flex flex-row items-start space-x-3 space-y-0 py-1"
+                                                        >
+                                                            <FormControl>
+                                                                <Checkbox
+                                                                    checked={field.value?.includes(cat.id)}
+                                                                    onCheckedChange={(checked) => {
+                                                                        return checked
+                                                                            ? field.onChange([...field.value, cat.id])
+                                                                            : field.onChange(
+                                                                                field.value?.filter(
+                                                                                    (value) => value !== cat.id
+                                                                                )
+                                                                            )
+                                                                    }}
+                                                                />
+                                                            </FormControl>
+                                                            <FormLabel className="font-normal cursor-pointer">
+                                                                {cat.name}
+                                                            </FormLabel>
+                                                        </FormItem>
+                                                    )
+                                                }}
+                                            />
+                                        ))}
+                                </ScrollArea>
+                                {form.formState.errors.categories && (
+                                    <p className="text-sm font-medium text-destructive">
+                                        {form.formState.errors.categories.message}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="duration_minutes"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Duración (min)</FormLabel>
+                                        <FormControl>
+                                            <Input type="number" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="total_questions"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Cant. Preguntas</FormLabel>
+                                        <FormControl>
+                                            <Input type="number" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="start_window"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Inicio (Fecha y Hora)</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                type="datetime-local"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="end_window"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Fin (Fecha y Hora)</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                type="datetime-local"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+
+                        <div className="border-t pt-4">
+                            <h4 className="text-sm font-medium mb-4">Periodo de Reclamos (Opcional)</h4>
+                            <div className="grid grid-cols-2 gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="claims_start"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Inicio Reclamos</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="datetime-local"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="claims_end"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Fin Reclamos</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="datetime-local"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+                        </div>
+
+                        <DialogFooter>
+                            <Button type="submit">Programar Examen</Button>
+                        </DialogFooter>
+                    </form>
+                </Form>
+            </DialogContent>
+        </Dialog>
+    )
+}
