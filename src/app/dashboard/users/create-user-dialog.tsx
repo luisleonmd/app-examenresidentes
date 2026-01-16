@@ -90,7 +90,7 @@ export function CreateUserDialog() {
                                 <FormItem>
                                     <FormLabel>Cédula</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="110180961" {...field} />
+                                        <Input placeholder="000000000" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

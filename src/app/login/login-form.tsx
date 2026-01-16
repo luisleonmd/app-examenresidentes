@@ -28,7 +28,7 @@ export default function LoginForm() {
                     Ingrese su cédula y contraseña para acceder.
                 </CardDescription>
             </CardHeader>
-            <form action={formAction}>
+            <form action={formAction} autoComplete="off">
                 <CardContent className="grid gap-4">
                     <div className="grid gap-2">
                         <Label htmlFor="cedula">Cédula</Label>
@@ -36,8 +36,10 @@ export default function LoginForm() {
                             id="cedula"
                             name="cedula"
                             type="text"
-                            placeholder="110180961"
+                            placeholder="000000000"
                             required
+                            autoComplete="off"
+                            defaultValue=""
                         />
                     </div>
                     <div className="grid gap-2">
