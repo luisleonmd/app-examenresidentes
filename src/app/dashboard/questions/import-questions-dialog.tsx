@@ -1,3 +1,5 @@
+"use client"
+
 import { useState, useEffect } from "react"
 import { getCategories } from "@/app/lib/questions"
 import { uploadQuestionsFile } from "@/app/lib/import-actions"
