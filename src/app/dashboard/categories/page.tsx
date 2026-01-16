@@ -14,6 +14,7 @@ import { EditCategoryButton } from "./edit-category-button"
 import { MergeCategoryButton } from "./merge-category-button"
 import { ViewCategoryQuestionsButton } from "./view-category-questions-button"
 import { DeleteAllCategoriesButton } from "./delete-all-categories-button"
+import { ClearCategoryButton } from "./clear-category-button"
 
 export default async function CategoriesPage() {
     const session = await auth()
@@ -71,6 +72,11 @@ export default async function CategoriesPage() {
                                             categoryName={cat.name}
                                             questionCount={cat._count?.questions || 0}
                                             allCategories={categories.map(c => ({ id: c.id, name: c.name }))}
+                                        />
+                                        <ClearCategoryButton
+                                            id={cat.id}
+                                            name={cat.name}
+                                            questionCount={cat._count?.questions || 0}
                                         />
                                         <DeleteCategoryButton
                                             id={cat.id}

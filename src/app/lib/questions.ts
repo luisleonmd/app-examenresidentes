@@ -306,3 +306,30 @@ export async function deleteAllCategories() {
         return { success: false, error: "Error al eliminar categorías. Puede haber datos relacionados (exámenes, intentos) que lo impiden." }
     }
 }
+
+export async function deleteAllQuestionsInCategory(categoryId: string) {
+    const { auth } = await import("@/auth")
+    const session = await auth()
+
+    if (!session?.user || session.user.role !== 'COORDINADOR') {
+        return { success: false, error: "No autorizado" }
+    }
+
+    try {
+        // Delete all questions in the specific category
+        const result = await prisma.question.deleteMany({
+            where: { category_id: categoryId }
+        })
+
+        revalidatePath('/dashboard/categories')
+        revalidatePath('/dashboard/questions')
+
+        return {
+            success: true,
+            message: `Se eliminaron ${result.count} preguntas de la categoría.`
+        }
+    } catch (error) {
+        console.error("Failed to delete questions in category:", error)
+        return { success: false, error: "Error al vaciar la categoría. Puede haber intentos de examen asociados." }
+    }
+}
