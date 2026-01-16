@@ -28,10 +28,39 @@ export async function importQuestionsJSON(
 
     try {
         // Parse JSON
-        const questions: JSONQuestion[] = JSON.parse(jsonData)
+        const rawData = JSON.parse(jsonData)
+        let questions: JSONQuestion[] = []
+
+        if (!Array.isArray(rawData)) {
+            return { success: false, error: "El JSON debe ser un array de preguntas" }
+        }
+
+        // Normalize Data: Support both formats (Standard vs Legacy/Custom)
+        questions = rawData.map((item: any) => {
+            // Check if it matches the "Legacy/Custom" format
+            if (item.pregunta && item.opciones && !Array.isArray(item.opciones)) {
+
+                // Convert options object {"A": "...", "B": "..."} to array
+                const optsArray = Object.entries(item.opciones).map(([key, val]) => ({
+                    text: String(val),
+                    is_correct: item.respuesta_correcta === key
+                }))
+
+                return {
+                    text: item.pregunta,
+                    explanation: item.justificacion_correcta || item.feedback_incorrecto?.[item.respuesta_correcta],
+                    category: item.tema || item.curso_rotacion || "General",
+                    options: optsArray,
+                    image_url: undefined
+                }
+            }
+
+            // Return as is (Standard format) or incomplete object to be caught by validation
+            return item as JSONQuestion
+        })
 
         if (!Array.isArray(questions)) {
-            return { success: false, error: "El JSON debe ser un array de preguntas" }
+            return { success: false, error: "El JSON debe ser un array de preguntas" } // Redundant but safe
         }
 
         let importedCount = 0
@@ -61,7 +90,7 @@ export async function importQuestionsJSON(
             // Validate question structure
             // If we have a targetCategory, we don't strictly need q.category in JSON
             if (!q.text || (!q.category && !targetCategoryId) || !q.options || !Array.isArray(q.options)) {
-                errors.push(`Pregunta ${i + 1}: Faltan campos requeridos (text, category*, options)`)
+                errors.push(`Pregunta ${i + 1}: Faltan campos requeridos (text, category*, options).`)
                 continue
             }
 
