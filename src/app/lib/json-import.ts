@@ -17,7 +17,10 @@ interface JSONQuestion {
     }>
 }
 
-export async function importQuestionsJSON(jsonData: string) {
+export async function importQuestionsJSON(
+    jsonData: string,
+    options: { overrideCategoryId?: string, newCategoryName?: string } = {}
+) {
     const session = await auth()
     if (!session?.user || session.user.role === 'RESIDENTE') {
         return { success: false, error: "No autorizado" }
@@ -34,12 +37,31 @@ export async function importQuestionsJSON(jsonData: string) {
         let importedCount = 0
         const errors: string[] = []
 
+        // Pre-resolve category if override is active
+        let targetCategoryId: string | null = null
+
+        if (options.newCategoryName) {
+            // Create new category
+            try {
+                const newCat = await prisma.questionCategory.create({
+                    data: { name: options.newCategoryName.trim() }
+                })
+                targetCategoryId = newCat.id
+            } catch (e) {
+                return { success: false, error: "Error al crear la nueva categoría. Posible duplicado." }
+            }
+        } else if (options.overrideCategoryId && options.overrideCategoryId !== "json") {
+            // Use existing category
+            targetCategoryId = options.overrideCategoryId
+        }
+
         for (let i = 0; i < questions.length; i++) {
             const q = questions[i]
 
             // Validate question structure
-            if (!q.text || !q.category || !q.options || !Array.isArray(q.options)) {
-                errors.push(`Pregunta ${i + 1}: Faltan campos requeridos (text, category, options)`)
+            // If we have a targetCategory, we don't strictly need q.category in JSON
+            if (!q.text || (!q.category && !targetCategoryId) || !q.options || !Array.isArray(q.options)) {
+                errors.push(`Pregunta ${i + 1}: Faltan campos requeridos (text, category*, options)`)
                 continue
             }
 
@@ -55,15 +77,21 @@ export async function importQuestionsJSON(jsonData: string) {
             }
 
             try {
-                // Find or create category
-                let category = await prisma.questionCategory.findFirst({
-                    where: { name: q.category }
-                })
+                let categoryIdToUse = targetCategoryId
 
-                if (!category) {
-                    category = await prisma.questionCategory.create({
-                        data: { name: q.category }
+                // If no override, use JSON category
+                if (!categoryIdToUse) {
+                    // Find or create category
+                    let category = await prisma.questionCategory.findFirst({
+                        where: { name: q.category }
                     })
+
+                    if (!category) {
+                        category = await prisma.questionCategory.create({
+                            data: { name: q.category }
+                        })
+                    }
+                    categoryIdToUse = category.id
                 }
 
                 // Format options with IDs
@@ -80,7 +108,7 @@ export async function importQuestionsJSON(jsonData: string) {
                         explanation: q.explanation || null,
                         image_url: q.image_url || null,
                         options: JSON.stringify(formattedOptions),
-                        category_id: category.id,
+                        category_id: categoryIdToUse!,
                         author_id: session.user.id,
                         status: 'PUBLISHED',
                         version: 1
@@ -94,6 +122,7 @@ export async function importQuestionsJSON(jsonData: string) {
         }
 
         revalidatePath('/dashboard/questions')
+        revalidatePath('/dashboard/categories')
 
         if (errors.length > 0) {
             return {

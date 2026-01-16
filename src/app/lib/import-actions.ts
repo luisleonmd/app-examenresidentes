@@ -18,9 +18,24 @@ export async function uploadQuestionsFile(formData: FormData) {
     if (!session?.user) return { success: false, message: "No autorizado" }
 
     const file = formData.get("file") as File
-    const categoryId = formData.get("categoryId") as string
+    let categoryId = formData.get("categoryId") as string
+    const newCategoryName = formData.get("newCategoryName") as string
 
-    if (!file || !categoryId) return { success: false, message: "Faltan datos" }
+    if (!file) return { success: false, message: "Falta el archivo" }
+
+    // Handle New Category Creation
+    if (newCategoryName) {
+        try {
+            const newCat = await prisma.questionCategory.create({
+                data: { name: newCategoryName.trim() }
+            })
+            categoryId = newCat.id
+        } catch (e) {
+            return { success: false, message: "Error al crear la categoría nueva" }
+        }
+    }
+
+    if (!categoryId) return { success: false, message: "Seleccione una categoría o cree una nueva" }
 
     let rawText = ""
 

@@ -64,7 +64,10 @@ const cleanText = (text: string): string => {
     return cleaned.trim()
 }
 
-export async function importMoodleXML(xmlContent: string) {
+export async function importMoodleXML(
+    xmlContent: string,
+    options: { overrideCategoryId?: string, newCategoryName?: string } = {}
+) {
     const session = await auth()
     if (!session?.user) return { success: false, error: "Unauthorized" }
 
@@ -121,10 +124,26 @@ export async function importMoodleXML(xmlContent: string) {
         return newCat.id
     }
 
-    // Default category if none specified (will be updated by category questions)
-    let currentCategoryId: string = existingCategories[0]?.id || ""
+    // --- DETERMINE TARGET CATEGORY ---
+    let targetCategoryId: string | null = null
+
+    if (options.newCategoryName) {
+        try {
+            const newCat = await prisma.questionCategory.create({
+                data: { name: options.newCategoryName.trim() }
+            })
+            targetCategoryId = newCat.id
+        } catch (e) {
+            return { success: false, error: "Error al crear la nueva categoría. Posible duplicado." }
+        }
+    } else if (options.overrideCategoryId && options.overrideCategoryId !== "xml") {
+        targetCategoryId = options.overrideCategoryId
+    }
+
+
+    // Default category if none specified (will be updated by category questions IF no override)
+    let currentCategoryId: string = targetCategoryId || existingCategories[0]?.id || ""
     if (!currentCategoryId) {
-        // Ensure at least one category exists
         const def = await prisma.questionCategory.create({ data: { name: "General" } })
         currentCategoryId = def.id
     }
@@ -133,14 +152,17 @@ export async function importMoodleXML(xmlContent: string) {
 
     for (const q of questions) {
         if (q.type === 'category') {
-            // Extract category path
-            // Structure: <category><text>Path/To/Category</text></category>
-            const catContent = extractTagContent(q.fullMatch, 'category')
-            const catTextRaw = extractTagContent(catContent, 'text') || catContent
-            const catText = cleanText(catTextRaw)
+            // ONLY use XML categories if NO override was provided
+            if (!targetCategoryId) {
+                // Extract category path
+                // Structure: <category><text>Path/To/Category</text></category>
+                const catContent = extractTagContent(q.fullMatch, 'category')
+                const catTextRaw = extractTagContent(catContent, 'text') || catContent
+                const catText = cleanText(catTextRaw)
 
-            if (catText) {
-                currentCategoryId = await getCategoryId(catText)
+                if (catText) {
+                    currentCategoryId = await getCategoryId(catText)
+                }
             }
             continue
         }
@@ -243,9 +265,12 @@ export async function importMoodleXML(xmlContent: string) {
 
                 if (options.length < 2) continue
 
-                // Verify we have a valid category
-                if (!currentCategoryId) {
-                    // Fallback check
+                // Verify we have a valid category if something weird happened
+                // Use targetCategoryId if strict, otherwise currentCategoryId
+                const finalCategoryId = targetCategoryId || currentCategoryId
+
+                if (!finalCategoryId) {
+                    // Should be covered by init logic, but safe fallback
                     const general = await prisma.questionCategory.findFirst({ where: { name: "General" } })
                     currentCategoryId = general ? general.id : (await prisma.questionCategory.create({ data: { name: "General" } })).id
                 }
@@ -256,7 +281,7 @@ export async function importMoodleXML(xmlContent: string) {
                         explanation: explanation,
                         image_url: imageUrl,
                         options: JSON.stringify(options),
-                        category_id: currentCategoryId,
+                        category_id: finalCategoryId || currentCategoryId,
                         author_id: session.user.id,
                         status: 'PUBLISHED',
                         version: 1,
@@ -271,5 +296,6 @@ export async function importMoodleXML(xmlContent: string) {
     }
 
     revalidatePath('/dashboard/questions')
+    revalidatePath('/dashboard/categories')
     return { success: true, count }
 }
