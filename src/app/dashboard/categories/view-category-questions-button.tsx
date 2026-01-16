@@ -16,6 +16,8 @@ import { Badge } from "@/components/ui/badge"
 import { getQuestions } from "@/app/lib/questions"
 import { MarkdownRenderer } from "@/components/markdown-renderer"
 
+import { EditQuestionDialog } from "@/app/dashboard/questions/edit-question-dialog"
+
 interface ViewCategoryQuestionsButtonProps {
     categoryId: string
     categoryName: string
@@ -110,6 +112,9 @@ export function ViewCategoryQuestionsButton({
                                                 </Badge>
                                                 <div className="flex-1">
                                                     <MarkdownRenderer content={question.text} />
+                                                </div>
+                                                <div className="ml-2">
+                                                    <EditQuestionDialog question={question} />
                                                 </div>
                                             </div>
 
