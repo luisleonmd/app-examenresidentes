@@ -126,10 +126,12 @@ export async function importQuestionsJSON(
 
         if (errors.length > 0) {
             return {
-                success: true,
+                success: importedCount > 0, // Only success if at least one imported
                 imported: importedCount,
                 errors: errors,
-                message: `Importadas ${importedCount} preguntas. ${errors.length} errores encontrados.`
+                message: importedCount > 0
+                    ? `Importadas ${importedCount} preguntas. ${errors.length} errores encontrados.`
+                    : `No se pudieron importar preguntas. ${errors.length} errores encontrados.`
             }
         }
 

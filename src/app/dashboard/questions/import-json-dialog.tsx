@@ -86,16 +86,21 @@ export function ImportJSONDialog() {
             newCategoryName: importMode === "new" ? newCategoryName : undefined
         }
 
-        const response = await importQuestionsJSON(jsonText, options)
-        setResult(response)
-        setLoading(false)
+        try {
+            const response = await importQuestionsJSON(jsonText, options)
+            setResult(response)
 
-        if (response.success) {
-            setTimeout(() => {
-                setOpen(false)
-                setJsonText("")
-                setResult(null)
-            }, 3000)
+            if (response.success && (!response.errors || response.errors.length === 0)) {
+                setTimeout(() => {
+                    setOpen(false)
+                    setJsonText("")
+                    setResult(null)
+                }, 2000)
+            }
+        } catch (err) {
+            setResult({ success: false, error: "Error de conexión o timeout. Intente con menos preguntas." })
+        } finally {
+            setLoading(false)
         }
     }
 
