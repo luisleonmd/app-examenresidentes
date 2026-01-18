@@ -69,7 +69,9 @@ export function AppSidebar({ role, ...props }: { role?: string } & React.Compone
         const newItem = { ...item }
 
         if (newItem.title === "Usuarios" && role !== 'COORDINADOR') return []
-        if (newItem.title === "Banco de Preguntas" && role === 'RESIDENTE') return []
+        // Eliminar Banco de Preguntas ya que se fusionó con Categorías
+        if (newItem.title === "Banco de Preguntas") return []
+        // Categorías ahora es accesible para todos los roles excepto RESIDENTE
         if (newItem.title === "Categorías" && role === 'RESIDENTE') return []
 
         if (newItem.title === "Impugnaciones") {
