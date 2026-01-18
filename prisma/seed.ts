@@ -75,6 +75,23 @@ async function main() {
         }
     })
 
+
+    // Upsert Professor
+    const professor = await prisma.user.upsert({
+        where: { cedula: '333333333' },
+        update: {
+            email: 'profesor@prueba.com'
+        },
+        create: {
+            cedula: '333333333',
+            nombre: 'Profesor Prueba',
+            role: 'PROFESOR',
+            email: 'profesor@prueba.com',
+            password_hash: hashedPassword,
+            active: true
+        }
+    })
+
     // Get a category for questions
     const catInternal = await prisma.questionCategory.findFirst({ where: { name: "Medicina Interna" } })
 
