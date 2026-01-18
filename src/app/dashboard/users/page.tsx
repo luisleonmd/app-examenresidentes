@@ -27,6 +27,7 @@ export default async function UsersPage() {
                         <TableRow>
                             <TableHead>Cédula</TableHead>
                             <TableHead>Nombre</TableHead>
+                            <TableHead>Email</TableHead>
                             <TableHead>Rol</TableHead>
                             <TableHead>Cohorte</TableHead>
                             <TableHead>Fecha Creación</TableHead>
@@ -38,6 +39,7 @@ export default async function UsersPage() {
                             <TableRow key={user.id}>
                                 <TableCell className="font-medium">{user.cedula}</TableCell>
                                 <TableCell>{user.nombre}</TableCell>
+                                <TableCell>{user.email || "-"}</TableCell>
                                 <TableCell>
                                     <Badge variant={
                                         user.role === 'COORDINADOR' ? 'default' :

@@ -36,6 +36,7 @@ import { Plus } from "lucide-react"
 const formSchema = z.object({
     cedula: z.string().min(9, "La cédula debe tener al menos 9 dígitos"),
     nombre: z.string().min(3, "El nombre es requerido"),
+    email: z.string().email("Correo electrónico inválido").optional().or(z.literal('')),
     role: z.enum(["COORDINADOR", "PROFESOR", "RESIDENTE"]),
     cohort: z.string().optional(),
     password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
@@ -48,6 +49,7 @@ export function CreateUserDialog() {
         defaultValues: {
             cedula: "",
             nombre: "",
+            email: "",
             role: "RESIDENTE",
             cohort: "R1",
             password: "",
@@ -104,6 +106,19 @@ export function CreateUserDialog() {
                                     <FormLabel>Nombre Completo</FormLabel>
                                     <FormControl>
                                         <Input placeholder="Juan Pérez" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="email"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Correo Electrónico</FormLabel>
+                                    <FormControl>
+                                        <Input type="email" placeholder="usuario@ejemplo.com" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

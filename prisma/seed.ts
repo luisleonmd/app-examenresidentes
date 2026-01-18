@@ -47,10 +47,13 @@ async function main() {
     // Upsert Admin
     const admin = await prisma.user.upsert({
         where: { cedula: '111111111' },
-        update: {},
+        update: {
+            email: 'luisleonmd@gmail.com'
+        },
         create: {
             cedula: '111111111',
             nombre: 'Admin Coordinador',
+            email: 'luisleonmd@gmail.com',
             role: 'COORDINADOR',
             password_hash: hashedPassword,
             active: true

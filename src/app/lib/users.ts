@@ -14,6 +14,7 @@ export async function getUsers() {
                 id: true,
                 cedula: true,
                 nombre: true,
+                email: true,
                 role: true,
                 cohort: true,
                 active: true,
@@ -35,6 +36,7 @@ export async function createUser(data: any) {
             data: {
                 cedula: data.cedula,
                 nombre: data.nombre,
+                email: data.email || null, // Optional
                 role: data.role,
                 cohort: data.role === 'RESIDENTE' ? data.cohort : null,
                 password_hash: hashedPassword,

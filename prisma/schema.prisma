@@ -13,8 +13,10 @@ model User {
   id                String       @id @default(uuid())
   cedula            String       @unique
   nombre            String
+  email             String?      @unique // Optional initially to allow existing users
   role              String       // COORDINADOR, PROFESOR, RESIDENTE
   password_hash     String
+  must_change_password Boolean   @default(false)
   two_factor_secret String?
   cohort            String?      // R1, R2, R3, R4
   active            Boolean      @default(true)

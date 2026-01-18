@@ -80,3 +80,55 @@ export async function changePassword(prevState: any, formData: FormData) {
         return { success: false, message: 'Error al cambiar la contraseña. Intente de nuevo.' };
     }
 }
+
+import { sendEmail } from '@/app/lib/email';
+import { randomBytes } from 'crypto';
+
+export async function resetPassword(formData: FormData) {
+    const cedula = formData.get('cedula') as string;
+    const email = formData.get('email') as string;
+
+    if (!cedula || !email) {
+        return { error: 'Cédula y correo son requeridos.' };
+    }
+
+    try {
+        const user = await prisma.user.findUnique({
+            where: { cedula },
+        });
+
+        if (!user || user.email !== email) {
+            // For security, do not reveal if user exists or email doesn't match, or generic message
+            // But user requested "cedula and mail must coincide"
+            return { error: 'Datos incorrectos o no coinciden con nuestros registros.' };
+        }
+
+        // Generate provisional password
+        const provisionalPassword = randomBytes(4).toString('hex'); // 8 chars
+        const hashedPassword = await bcrypt.hash(provisionalPassword, 10);
+
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                password_hash: hashedPassword,
+                must_change_password: true // Check schema if we added this, yes we did.
+            },
+        });
+
+        const html = `
+            <h1>Recuperación de Contraseña</h1>
+            <p>Hola ${user.nombre},</p>
+            <p>Se ha solicitado un restablecimiento de contraseña para su cuenta.</p>
+            <p><strong>Su nueva contraseña provisional es: ${provisionalPassword}</strong></p>
+            <p>Por favor ingrese con esta contraseña.</p>
+        `;
+
+        await sendEmail(email, 'Recuperación de Contraseña - Sistema Residentes', html);
+
+        return { success: 'Se ha enviado una nueva contraseña a su correo.' };
+
+    } catch (error) {
+        console.error('Reset password error:', error);
+        return { error: 'Error al procesar la solicitud.' };
+    }
+}

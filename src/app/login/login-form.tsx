@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ForgotPasswordDialog } from './forgot-password-dialog';
 
 export default function LoginForm() {
     const [errorMessage, formAction, isPending] = useActionState(
@@ -53,9 +54,14 @@ export default function LoginForm() {
                     )}
                 </CardContent>
                 <CardFooter>
-                    <Button className="w-full" disabled={isPending}>
-                        {isPending ? 'Ingresando...' : 'Ingresar'}
-                    </Button>
+                    <div className="flex flex-col w-full gap-2">
+                        <Button className="w-full" disabled={isPending}>
+                            {isPending ? 'Ingresando...' : 'Ingresar'}
+                        </Button>
+                        <div className="flex justify-center">
+                            <ForgotPasswordDialog />
+                        </div>
+                    </div>
                 </CardFooter>
             </form>
         </Card>
