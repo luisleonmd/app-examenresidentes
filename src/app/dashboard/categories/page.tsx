@@ -52,12 +52,12 @@ export default async function CategoriesPage(props: {
             </div>
 
             <Tabs defaultValue="questions" className="w-full">
-                <TabsList>
-                    <TabsTrigger value="questions">Banco de Preguntas</TabsTrigger>
-                    {isCoordinador && (
+                {isCoordinador && (
+                    <TabsList>
+                        <TabsTrigger value="questions">Banco de Preguntas</TabsTrigger>
                         <TabsTrigger value="categories">Administrar Categorías</TabsTrigger>
-                    )}
-                </TabsList>
+                    </TabsList>
+                )}
 
                 <TabsContent value="questions" className="space-y-4 mt-4">
                     <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
