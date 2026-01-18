@@ -63,12 +63,16 @@ export default async function CategoriesPage(props: {
                     <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
                         <div className="flex flex-wrap gap-2">
                             <CategoryFilter categories={categories} />
-                            <ExportQuestionsButton categoryId={searchParams.category} />
-                            <ExportMoodleButton categoryId={searchParams.category} />
-                            <ImportJSONDialog />
-                            <ImportMoodleDialog />
-                            <ImportQuestionsDialog />
-                            <CreateQuestionDialog />
+                            {isCoordinador && (
+                                <>
+                                    <ExportQuestionsButton categoryId={searchParams.category} />
+                                    <ExportMoodleButton categoryId={searchParams.category} />
+                                    <ImportJSONDialog />
+                                    <ImportMoodleDialog />
+                                    <ImportQuestionsDialog />
+                                    <CreateQuestionDialog />
+                                </>
+                            )}
                         </div>
                     </div>
 
@@ -105,8 +109,12 @@ export default async function CategoriesPage(props: {
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-1">
                                                 <ViewQuestionDialog question={q} />
-                                                <EditQuestionDialog question={q} />
-                                                <DeleteQuestionButton id={q.id} />
+                                                {isCoordinador && (
+                                                    <>
+                                                        <EditQuestionDialog question={q} />
+                                                        <DeleteQuestionButton id={q.id} />
+                                                    </>
+                                                )}
                                             </div>
                                         </TableCell>
                                     </TableRow>
