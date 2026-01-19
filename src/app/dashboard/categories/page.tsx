@@ -52,130 +52,131 @@ export default async function CategoriesPage(props: {
                 <h1 className="text-2xl font-bold">Gestión de Catálogo</h1>
             </div>
 
-            {isCoordinador && (
-                <TabsList>
-                    <TabsTrigger value="questions">Banco de Preguntas</TabsTrigger>
-                    <TabsTrigger value="categories">Administrar Categorías</TabsTrigger>
-                </TabsList>
-            )}
+            <Tabs defaultValue="questions" className="w-full">
+                {isCoordinador && (
+                    <TabsList>
+                        <TabsTrigger value="questions">Banco de Preguntas</TabsTrigger>
+                        <TabsTrigger value="categories">Administrar Categorías</TabsTrigger>
+                    </TabsList>
+                )}
 
-            <TabsContent value="questions" className="space-y-4 mt-4">
-                <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
-                    <div className="flex flex-wrap gap-2">
-                        <CategoryFilter categories={categories} />
-                        {isCoordinador && (
-                            <>
-                                <ExportQuestionsButton categoryId={searchParams.category} />
-                                <ExportMoodleButton categoryId={searchParams.category} />
-                                <ImportJSONDialog />
-                                <ImportMoodleDialog />
-                                <ImportQuestionsDialog />
-                                <CreateQuestionDialog />
-                            </>
+                <TabsContent value="questions" className="space-y-4 mt-4">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
+                        <div className="flex flex-wrap gap-2">
+                            <CategoryFilter categories={categories} />
+                            {isCoordinador && (
+                                <>
+                                    <ExportQuestionsButton categoryId={searchParams.category} />
+                                    <ExportMoodleButton categoryId={searchParams.category} />
+                                    <ImportJSONDialog />
+                                    <ImportMoodleDialog />
+                                    <ImportQuestionsDialog />
+                                    <CreateQuestionDialog />
+                                </>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="border rounded-md">
+                        {searchParams.category ? (
+                            <QuestionsTable questions={questions} isCoordinador={isCoordinador} />
+                        ) : (
+                            <Accordion type="multiple" className="w-full" defaultValue={Array.from(new Set(questions.map(q => q.category.name)))}>
+                                {Object.entries(
+                                    questions.reduce((acc, q) => {
+                                        const key = q.category.name
+                                        if (!acc[key]) acc[key] = []
+                                        acc[key].push(q)
+                                        return acc
+                                    }, {} as Record<string, typeof questions>)
+                                ).sort((a, b) => a[0].localeCompare(b[0])).map(([categoryName, catQuestions]) => (
+                                    <AccordionItem key={categoryName} value={categoryName}>
+                                        <AccordionTrigger className="px-4 hover:no-underline hover:bg-muted/50">
+                                            <span className="font-semibold">{categoryName}</span>
+                                            <span className="ml-2 text-muted-foreground text-sm">({catQuestions.length} preguntas)</span>
+                                        </AccordionTrigger>
+                                        <AccordionContent>
+                                            <QuestionsTable questions={catQuestions} isCoordinador={isCoordinador} />
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                ))}
+                                {questions.length === 0 && (
+                                    <div className="text-center py-8 text-muted-foreground">
+                                        No hay preguntas registradas. Comience agregando una manualmente o importando un archivo.
+                                    </div>
+                                )}
+                            </Accordion>
                         )}
                     </div>
-                </div>
-
-                <div className="border rounded-md">
-                    {searchParams.category ? (
-                        <QuestionsTable questions={questions} isCoordinador={isCoordinador} />
-                    ) : (
-                        <Accordion type="multiple" className="w-full" defaultValue={Array.from(new Set(questions.map(q => q.category.name)))}>
-                            {Object.entries(
-                                questions.reduce((acc, q) => {
-                                    const key = q.category.name
-                                    if (!acc[key]) acc[key] = []
-                                    acc[key].push(q)
-                                    return acc
-                                }, {} as Record<string, typeof questions>)
-                            ).sort((a, b) => a[0].localeCompare(b[0])).map(([categoryName, catQuestions]) => (
-                                <AccordionItem key={categoryName} value={categoryName}>
-                                    <AccordionTrigger className="px-4 hover:no-underline hover:bg-muted/50">
-                                        <span className="font-semibold">{categoryName}</span>
-                                        <span className="ml-2 text-muted-foreground text-sm">({catQuestions.length} preguntas)</span>
-                                    </AccordionTrigger>
-                                    <AccordionContent>
-                                        <QuestionsTable questions={catQuestions} isCoordinador={isCoordinador} />
-                                    </AccordionContent>
-                                </AccordionItem>
-                            ))}
-                            {questions.length === 0 && (
-                                <div className="text-center py-8 text-muted-foreground">
-                                    No hay preguntas registradas. Comience agregando una manualmente o importando un archivo.
-                                </div>
-                            )}
-                        </Accordion>
-                    )}
-                </div>
-            </TabsContent>
-
-            {isCoordinador && (
-                <TabsContent value="categories" className="space-y-4 mt-4">
-                    <div className="flex justify-end">
-                        <DeleteAllCategoriesButton />
-                    </div>
-                    <div className="border rounded-md">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Categoría</TableHead>
-                                    <TableHead className="text-center">Preguntas</TableHead>
-                                    <TableHead className="text-right">Acciones</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {categories.length === 0 ? (
-                                    <TableRow>
-                                        <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
-                                            No hay categorías registradas.
-                                        </TableCell>
-                                    </TableRow>
-                                ) : categories.map((cat) => (
-                                    <TableRow key={cat.id}>
-                                        <TableCell className="font-medium">{cat.name}</TableCell>
-                                        <TableCell className="text-center">
-                                            <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
-                                                {cat._count?.questions || 0}
-                                            </span>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="flex justify-end gap-1">
-                                                <ViewCategoryQuestionsButton
-                                                    categoryId={cat.id}
-                                                    categoryName={cat.name}
-                                                    questionCount={cat._count?.questions || 0}
-                                                />
-                                                <EditCategoryButton
-                                                    id={cat.id}
-                                                    name={cat.name}
-                                                />
-                                                <MergeCategoryButton
-                                                    categoryId={cat.id}
-                                                    categoryName={cat.name}
-                                                    questionCount={cat._count?.questions || 0}
-                                                    allCategories={categories.map(c => ({ id: c.id, name: c.name }))}
-                                                />
-                                                <ClearCategoryButton
-                                                    id={cat.id}
-                                                    name={cat.name}
-                                                    questionCount={cat._count?.questions || 0}
-                                                />
-                                                <DeleteCategoryButton
-                                                    id={cat.id}
-                                                    name={cat.name}
-                                                    questionCount={cat._count?.questions || 0}
-                                                />
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </div>
                 </TabsContent>
-            )}
-        </Tabs>
-        </div >
+
+                {isCoordinador && (
+                    <TabsContent value="categories" className="space-y-4 mt-4">
+                        <div className="flex justify-end">
+                            <DeleteAllCategoriesButton />
+                        </div>
+                        <div className="border rounded-md">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Categoría</TableHead>
+                                        <TableHead className="text-center">Preguntas</TableHead>
+                                        <TableHead className="text-right">Acciones</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {categories.length === 0 ? (
+                                        <TableRow>
+                                            <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
+                                                No hay categorías registradas.
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : categories.map((cat) => (
+                                        <TableRow key={cat.id}>
+                                            <TableCell className="font-medium">{cat.name}</TableCell>
+                                            <TableCell className="text-center">
+                                                <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                                                    {cat._count?.questions || 0}
+                                                </span>
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                <div className="flex justify-end gap-1">
+                                                    <ViewCategoryQuestionsButton
+                                                        categoryId={cat.id}
+                                                        categoryName={cat.name}
+                                                        questionCount={cat._count?.questions || 0}
+                                                    />
+                                                    <EditCategoryButton
+                                                        id={cat.id}
+                                                        name={cat.name}
+                                                    />
+                                                    <MergeCategoryButton
+                                                        categoryId={cat.id}
+                                                        categoryName={cat.name}
+                                                        questionCount={cat._count?.questions || 0}
+                                                        allCategories={categories.map(c => ({ id: c.id, name: c.name }))}
+                                                    />
+                                                    <ClearCategoryButton
+                                                        id={cat.id}
+                                                        name={cat.name}
+                                                        questionCount={cat._count?.questions || 0}
+                                                    />
+                                                    <DeleteCategoryButton
+                                                        id={cat.id}
+                                                        name={cat.name}
+                                                        questionCount={cat._count?.questions || 0}
+                                                    />
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </TabsContent>
+                )}
+            </Tabs>
+        </div>
     )
 }
 
