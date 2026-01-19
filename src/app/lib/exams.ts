@@ -3,6 +3,7 @@
 import { PrismaClient } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 import { auth } from "@/auth"
+import { calculateQuestionDistribution } from "./exam-config"
 
 const prisma = new PrismaClient()
 
@@ -116,20 +117,19 @@ export async function createExam(data: any) {
 
         // If a specific resident was selected, create an ExamProfile for them
         if (data.assigned_to_user_id && data.assigned_to_user_id !== 'all') {
-            // Calculate equal distribution of questions across categories
-            const categoriesCount = data.categories.length
-            const questionsPerCategory = Math.floor(parseInt(data.total_questions) / categoriesCount)
+            // Fetch category names to use utility
+            const selectedCategories = await prisma.questionCategory.findMany({
+                where: { id: { in: data.categories } },
+                select: { id: true, name: true }
+            })
 
-            const configuration = data.categories.map((categoryId: string) => ({
-                categoryId,
-                count: questionsPerCategory
-            }))
+            const distribution = calculateQuestionDistribution(parseInt(data.total_questions), selectedCategories)
 
             await prisma.examProfile.create({
                 data: {
                     exam_id: exam.id,
                     user_id: data.assigned_to_user_id,
-                    configuration: JSON.stringify(configuration)
+                    configuration: JSON.stringify(distribution)
                 }
             })
         }

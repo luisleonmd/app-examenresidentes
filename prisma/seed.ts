@@ -8,6 +8,7 @@ async function main() {
         "Medicina Interna", "Comunidad 1", "Comunidad 2", "Geriatría", "Ginecología",
         "Pediatría", "Ortopedia", "Oftalmología", "Otorrinolaringología", "Fisiatría",
         "Psiquiatría", "Hospital de Día", "Clínica VIH", "Cirugía Menor",
+        "Dermatología", "Neonatología",
         "Curso Familiar 1", "Curso Familiar 2", "Curso Gestión", "Curso Salud Pública",
         "Curso Emergencias", "Curso Valoración Perioperatoria", "Curso Ultrasonido"
     ]

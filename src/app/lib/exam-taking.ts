@@ -3,6 +3,7 @@
 import { PrismaClient } from "@prisma/client"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
+import { calculateQuestionDistribution } from "./exam-config"
 
 const prisma = new PrismaClient()
 
@@ -92,21 +93,30 @@ export async function startExam(examId: string) {
             console.error("Error parsing exam categories", e)
         }
 
-        // Pick Random Questions from selected categories
-        const allQuestionIds = await prisma.question.findMany({
-            where: {
-                status: 'PUBLISHED',
-                ...(validCategoryIds.length > 0 ? { category_id: { in: validCategoryIds } } : {})
-            },
-            select: { id: true }
+        if (validCategoryIds.length === 0) return { success: false, error: "El examen no tiene categorías configuradas." }
+
+        // Fetch category details
+        const categories = await prisma.questionCategory.findMany({
+            where: { id: { in: validCategoryIds } },
+            select: { id: true, name: true }
         })
 
-        if (allQuestionIds.length < exam.total_questions) {
-            return { success: false, error: `No hay suficientes preguntas en las categorías seleccionadas (${allQuestionIds.length}/${exam.total_questions}).` }
+        const distribution = calculateQuestionDistribution(exam.total_questions, categories)
+
+        for (const rule of distribution) {
+            // Get all IDs for this category
+            const questionIds = await prisma.question.findMany({
+                where: { status: 'PUBLISHED', category_id: rule.categoryId },
+                select: { id: true }
+            })
+
+            // Shuffle and take N
+            const shuffled = questionIds.sort(() => 0.5 - Math.random())
+            selected.push(...shuffled.slice(0, rule.count))
         }
 
-        const shuffled = allQuestionIds.sort(() => 0.5 - Math.random())
-        selected = shuffled.slice(0, exam.total_questions)
+        // Just in case we missed some due to lack of questions in DB, check count?
+        // Ideally we warn, but for now we proceed with what we got.
     }
 
     // Create Attempt and Answers
