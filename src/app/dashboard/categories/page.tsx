@@ -1,4 +1,4 @@
-import { getCategories, getQuestions } from "@/app/lib/questions"
+import { getCategories } from "@/app/lib/questions"
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import {
@@ -21,15 +21,10 @@ import { CreateQuestionDialog } from "../questions/create-question-dialog"
 import { ImportQuestionsDialog } from "../questions/import-questions-dialog"
 import { ImportMoodleDialog } from "../questions/import-moodle-dialog"
 import { ImportJSONDialog } from "../questions/import-json-dialog"
-import { DeleteQuestionButton } from "../questions/delete-question-button"
-import { ViewQuestionDialog } from "../questions/view-question-dialog"
-import { EditQuestionDialog } from "../questions/edit-question-dialog"
-import { CategoryFilter } from "../questions/category-filter"
 import { ExportQuestionsButton } from "../questions/export-questions-button"
 import { ExportMoodleButton } from "../questions/export-moodle-button"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 
 export default async function CategoriesPage(props: {
     searchParams: Promise<{ category?: string }>
@@ -43,7 +38,6 @@ export default async function CategoriesPage(props: {
     }
 
     const categories = await getCategories()
-    const questions = await getQuestions(searchParams.category)
     const isCoordinador = session?.user.role === 'COORDINADOR'
 
     return (
@@ -63,7 +57,6 @@ export default async function CategoriesPage(props: {
                 <TabsContent value="questions" className="space-y-4 mt-4">
                     <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
                         <div className="flex flex-wrap gap-2">
-                            <CategoryFilter categories={categories} />
                             {isCoordinador && (
                                 <>
                                     <ExportQuestionsButton categoryId={searchParams.category} />
@@ -78,35 +71,43 @@ export default async function CategoriesPage(props: {
                     </div>
 
                     <div className="border rounded-md">
-                        {searchParams.category ? (
-                            <QuestionsTable questions={questions} isCoordinador={isCoordinador} />
-                        ) : (
-                            <Accordion type="multiple" className="w-full" defaultValue={Array.from(new Set(questions.map(q => q.category.name)))}>
-                                {Object.entries(
-                                    questions.reduce((acc, q) => {
-                                        const key = q.category.name
-                                        if (!acc[key]) acc[key] = []
-                                        acc[key].push(q)
-                                        return acc
-                                    }, {} as Record<string, typeof questions>)
-                                ).sort((a, b) => a[0].localeCompare(b[0])).map(([categoryName, catQuestions]) => (
-                                    <AccordionItem key={categoryName} value={categoryName}>
-                                        <AccordionTrigger className="px-4 hover:no-underline hover:bg-muted/50">
-                                            <span className="font-semibold">{categoryName}</span>
-                                            <span className="ml-2 text-muted-foreground text-sm">({catQuestions.length} preguntas)</span>
-                                        </AccordionTrigger>
-                                        <AccordionContent>
-                                            <QuestionsTable questions={catQuestions} isCoordinador={isCoordinador} />
-                                        </AccordionContent>
-                                    </AccordionItem>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Categoría</TableHead>
+                                    <TableHead className="text-center">Preguntas</TableHead>
+                                    <TableHead className="text-right">Acciones</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {categories.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
+                                            No hay categorías registradas.
+                                        </TableCell>
+                                    </TableRow>
+                                ) : categories.map((cat) => (
+                                    <TableRow key={cat.id}>
+                                        <TableCell className="font-medium">{cat.name}</TableCell>
+                                        <TableCell className="text-center">
+                                            <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                                                {cat._count?.questions || 0}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <div className="flex justify-end gap-1">
+                                                <ViewCategoryQuestionsButton
+                                                    categoryId={cat.id}
+                                                    categoryName={cat.name}
+                                                    questionCount={cat._count?.questions || 0}
+                                                    canEdit={isCoordinador}
+                                                />
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
                                 ))}
-                                {questions.length === 0 && (
-                                    <div className="text-center py-8 text-muted-foreground">
-                                        No hay preguntas registradas. Comience agregando una manualmente o importando un archivo.
-                                    </div>
-                                )}
-                            </Accordion>
-                        )}
+                            </TableBody>
+                        </Table>
                     </div>
                 </TabsContent>
 
@@ -145,6 +146,7 @@ export default async function CategoriesPage(props: {
                                                         categoryId={cat.id}
                                                         categoryName={cat.name}
                                                         questionCount={cat._count?.questions || 0}
+                                                        canEdit={isCoordinador}
                                                     />
                                                     <EditCategoryButton
                                                         id={cat.id}
@@ -177,55 +179,5 @@ export default async function CategoriesPage(props: {
                 )}
             </Tabs>
         </div>
-    )
-}
-
-function QuestionsTable({ questions, isCoordinador }: { questions: any[], isCoordinador: boolean }) {
-    if (questions.length === 0) {
-        return (
-            <div className="text-center py-8 text-muted-foreground">
-                No hay preguntas registradas.
-            </div>
-        )
-    }
-    return (
-        <Table>
-            <TableHeader>
-                <TableRow>
-                    <TableHead className="w-[100px]">ID</TableHead>
-                    <TableHead>Pregunta</TableHead>
-                    <TableHead>Categoría</TableHead>
-                    <TableHead>Autor</TableHead>
-                    <TableHead>Versión</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
-                </TableRow>
-            </TableHeader>
-            <TableBody>
-                {questions.map((q) => (
-                    <TableRow key={q.id}>
-                        <TableCell className="font-mono text-xs">{q.id.substring(0, 8)}</TableCell>
-                        <TableCell className="max-w-[400px] truncate">{q.text}</TableCell>
-                        <TableCell>
-                            <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold hover:bg-secondary/80">
-                                {q.category.name}
-                            </span>
-                        </TableCell>
-                        <TableCell>{q.author.nombre}</TableCell>
-                        <TableCell className="text-center">{q.version}</TableCell>
-                        <TableCell className="text-right">
-                            <div className="flex justify-end gap-1">
-                                <ViewQuestionDialog question={q} />
-                                {isCoordinador && (
-                                    <>
-                                        <EditQuestionDialog question={q} />
-                                        <DeleteQuestionButton id={q.id} />
-                                    </>
-                                )}
-                            </div>
-                        </TableCell>
-                    </TableRow>
-                ))}
-            </TableBody>
-        </Table>
     )
 }

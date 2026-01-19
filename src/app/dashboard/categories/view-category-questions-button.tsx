@@ -22,12 +22,14 @@ interface ViewCategoryQuestionsButtonProps {
     categoryId: string
     categoryName: string
     questionCount: number
+    canEdit?: boolean
 }
 
 export function ViewCategoryQuestionsButton({
     categoryId,
     categoryName,
-    questionCount
+    questionCount,
+    canEdit = false
 }: ViewCategoryQuestionsButtonProps) {
     const [open, setOpen] = useState(false)
     const [questions, setQuestions] = useState<any[]>([])
@@ -113,9 +115,11 @@ export function ViewCategoryQuestionsButton({
                                                 <div className="flex-1">
                                                     <MarkdownRenderer content={question.text} />
                                                 </div>
-                                                <div className="ml-2">
-                                                    <EditQuestionDialog question={question} />
-                                                </div>
+                                                {canEdit && (
+                                                    <div className="ml-2">
+                                                        <EditQuestionDialog question={question} />
+                                                    </div>
+                                                )}
                                             </div>
 
                                             {question.image_url && (
