@@ -17,6 +17,7 @@ import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { DownloadCourseReportButton } from "./download-course-report-button"
 import { ExportExamResultsButton } from "./export-exam-results-button"
+import { ConsolidatedReportButton } from "./consolidated-report-button"
 
 export default function ExamResultsProfessorPage() {
     const params = useParams()
@@ -48,6 +49,7 @@ export default function ExamResultsProfessorPage() {
                     <h1 className="text-2xl font-bold">Resultados del Examen</h1>
                 </div>
                 <div className="flex gap-2">
+                    <ConsolidatedReportButton examId={examId} />
                     <ExportExamResultsButton examId={examId} />
                     <DownloadCourseReportButton examId={examId} />
                 </div>

@@ -344,3 +344,106 @@ export async function getExamResultsForProfessor(examId: string) {
         endTime: att.end_time
     }))
 }
+
+export async function getConsolidatedExamReportData(examId: string) {
+    const session = await auth()
+    if (!session?.user || (session.user.role !== 'COORDINADOR' && session.user.role !== 'PROFESOR')) {
+        throw new Error("Unauthorized")
+    }
+
+    const exam = await prisma.exam.findUnique({
+        where: { id: examId },
+        include: { course: true }
+    })
+
+    if (!exam) throw new Error("Exam not found")
+
+    // Fetch all attempts with full details
+    const attempts = await prisma.examAttempt.findMany({
+        where: {
+            exam_id: examId,
+            status: 'SUBMITTED' // Only submitted exams
+        },
+        include: {
+            user: {
+                select: {
+                    nombre: true,
+                    cedula: true
+                }
+            },
+            answers: {
+                include: {
+                    question: true
+                }
+            }
+        },
+        orderBy: {
+            user: {
+                nombre: 'asc'
+            }
+        }
+    })
+
+    // Fetch all claims for this exam to map them
+    const claims = await prisma.claim.findMany({
+        where: {
+            attempt: {
+                exam_id: examId
+            }
+        }
+    })
+
+    // Map claims by attemptId -> questionId
+    const claimsMap = new Map<string, Map<string, any>>()
+    claims.forEach(c => {
+        if (!claimsMap.has(c.attempt_id)) {
+            claimsMap.set(c.attempt_id, new Map())
+        }
+        claimsMap.get(c.attempt_id)?.set(c.question_id, c)
+    })
+
+    // Format data for PDF
+    const reports = attempts.map(attempt => {
+        const attemptClaims = claimsMap.get(attempt.id)
+
+        const questions = attempt.answers.map(ans => {
+            const options = JSON.parse(ans.question.options) as any[]
+            const claim = attemptClaims?.get(ans.question_id)
+
+            return {
+                text: ans.question.text,
+                options: options.map(opt => ({
+                    id: opt.id,
+                    text: opt.text,
+                    is_correct: opt.is_correct
+                })),
+                userAnswer: ans.selected_option_id,
+                isCorrect: ans.is_correct,
+                // Claim info if needed for report
+                hasClaim: !!claim,
+                claimStatus: claim?.status
+            }
+        })
+
+        return {
+            student: {
+                nombre: attempt.user.nombre,
+                cedula: attempt.user.cedula
+            },
+            attempt: {
+                start_time: attempt.start_time,
+                end_time: attempt.end_time,
+                score: attempt.score
+            },
+            questions
+        }
+    })
+
+    return {
+        exam: {
+            title: exam.title,
+            course: exam.course ? { name: exam.course.name } : null
+        },
+        reports
+    }
+}
