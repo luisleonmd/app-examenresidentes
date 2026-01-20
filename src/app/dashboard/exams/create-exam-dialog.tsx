@@ -7,6 +7,7 @@ import * as z from "zod"
 import { createExam, getCourses } from "@/app/lib/exams"
 import { getCategories } from "@/app/lib/questions" // Reuse this action
 import { Button } from "@/components/ui/button"
+import { DateTimePicker } from "@/components/ui/date-time-picker"
 import {
     Dialog,
     DialogContent,
@@ -43,11 +44,11 @@ const formSchema = z.object({
     categories: z.array(z.string()).min(1, "Seleccione al menos una categoría"),
     duration_minutes: z.string().refine(val => !isNaN(Number(val)) && Number(val) > 0, "Debe ser un número mayor a 0"),
     total_questions: z.string().refine(val => !isNaN(Number(val)) && Number(val) > 0, "Debe ser mayor a 0"),
-    start_window: z.string().refine(val => new Date(val).toString() !== 'Invalid Date', "Fecha inválida"),
-    end_window: z.string().refine(val => new Date(val).toString() !== 'Invalid Date', "Fecha inválida"),
-    claims_start: z.string().optional(),
-    claims_end: z.string().optional(),
-}).refine(data => new Date(data.end_window) > new Date(data.start_window), {
+    start_window: z.date({ required_error: "Fecha requerida" }),
+    end_window: z.date({ required_error: "Fecha requerida" }),
+    claims_start: z.date().optional(),
+    claims_end: z.date().optional(),
+}).refine(data => data.end_window > data.start_window, {
     message: "La fecha final debe ser posterior a la inicial",
     path: ["end_window"]
 })
@@ -66,10 +67,8 @@ export function CreateExamDialog() {
             categories: [],
             duration_minutes: "60",
             total_questions: "20",
-            start_window: "",
-            end_window: "",
-            claims_start: "",
-            claims_end: "",
+            // start_window: undefined, // Let it be undefined initially
+            // end_window: undefined,
         },
     })
 
@@ -83,10 +82,10 @@ export function CreateExamDialog() {
         // Convert string dates to Date objects for server
         const payload = {
             ...values,
-            start_window: new Date(values.start_window),
-            end_window: new Date(values.end_window),
-            claims_start: values.claims_start ? new Date(values.claims_start) : null,
-            claims_end: values.claims_end ? new Date(values.claims_end) : null,
+            start_window: values.start_window,
+            end_window: values.end_window,
+            claims_start: values.claims_start || null,
+            claims_end: values.claims_end || null,
         }
 
         const result = await createExam(payload)
@@ -243,14 +242,12 @@ export function CreateExamDialog() {
                                 control={form.control}
                                 name="start_window"
                                 render={({ field }) => (
-                                    <FormItem>
+                                    <FormItem className="flex flex-col">
                                         <FormLabel>Inicio (Fecha y Hora)</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                type="datetime-local"
-                                                {...field}
-                                            />
-                                        </FormControl>
+                                        <DateTimePicker
+                                            date={field.value}
+                                            setDate={field.onChange}
+                                        />
                                         <FormMessage />
                                     </FormItem>
                                 )}
@@ -260,14 +257,12 @@ export function CreateExamDialog() {
                                 control={form.control}
                                 name="end_window"
                                 render={({ field }) => (
-                                    <FormItem>
+                                    <FormItem className="flex flex-col">
                                         <FormLabel>Fin (Fecha y Hora)</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                type="datetime-local"
-                                                {...field}
-                                            />
-                                        </FormControl>
+                                        <DateTimePicker
+                                            date={field.value}
+                                            setDate={field.onChange}
+                                        />
                                         <FormMessage />
                                     </FormItem>
                                 )}
@@ -281,14 +276,12 @@ export function CreateExamDialog() {
                                     control={form.control}
                                     name="claims_start"
                                     render={({ field }) => (
-                                        <FormItem>
+                                        <FormItem className="flex flex-col">
                                             <FormLabel>Inicio Reclamos</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    type="datetime-local"
-                                                    {...field}
-                                                />
-                                            </FormControl>
+                                            <DateTimePicker
+                                                date={field.value}
+                                                setDate={field.onChange}
+                                            />
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -298,14 +291,12 @@ export function CreateExamDialog() {
                                     control={form.control}
                                     name="claims_end"
                                     render={({ field }) => (
-                                        <FormItem>
+                                        <FormItem className="flex flex-col">
                                             <FormLabel>Fin Reclamos</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    type="datetime-local"
-                                                    {...field}
-                                                />
-                                            </FormControl>
+                                            <DateTimePicker
+                                                date={field.value}
+                                                setDate={field.onChange}
+                                            />
                                             <FormMessage />
                                         </FormItem>
                                     )}
