@@ -1,5 +1,6 @@
 import { getUsers } from "@/app/lib/users"
 import { CreateUserDialog } from "./create-user-dialog"
+import { ImportUsersDialog } from "./import-users-dialog"
 import {
     Table,
     TableBody,
@@ -18,7 +19,10 @@ export default async function UsersPage() {
         <div className="space-y-4">
             <div className="flex justify-between items-center">
                 <h1 className="text-2xl font-bold">Gestión de Usuarios</h1>
-                <CreateUserDialog />
+                <div className="flex gap-2">
+                    <ImportUsersDialog />
+                    <CreateUserDialog />
+                </div>
             </div>
 
             <div className="border rounded-md">
