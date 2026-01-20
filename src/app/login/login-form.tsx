@@ -45,7 +45,13 @@ export default function LoginForm() {
                     </div>
                     <div className="grid gap-2">
                         <Label htmlFor="password">Contraseña</Label>
-                        <Input id="password" name="password" type="password" required />
+                        <Input
+                            id="password"
+                            name="password"
+                            type="password"
+                            required
+                            autoComplete="new-password"
+                        />
                     </div>
                     {errorMessage && (
                         <div className="text-sm text-red-500 font-medium">

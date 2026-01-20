@@ -1,5 +1,6 @@
 import { AppSidebar } from "@/components/app-sidebar"
 import { SessionTimeout } from "@/components/session-timeout"
+import { InactivityMonitor } from "@/components/inactivity-monitor"
 import {
     SidebarInset,
     SidebarProvider,
@@ -20,6 +21,7 @@ export default async function DashboardLayout({
     return (
         <SidebarProvider>
             <SessionTimeout />
+            <InactivityMonitor />
             <AppSidebar role={session?.user?.role} />
             <SidebarInset>
                 <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 border-b px-4 justify-between bg-card">
