@@ -22,17 +22,6 @@ async function getUser(cedula: string) {
 export const { auth, signIn, signOut, handlers } = NextAuth({
     ...authConfig,
     session: { strategy: 'jwt', maxAge: 300 }, // 5 minutes standard expiry
-    cookies: {
-        sessionToken: {
-            name: process.env.NODE_ENV === 'production' ? `__Secure-next-auth.session-token` : `next-auth.session-token`,
-            options: {
-                httpOnly: true,
-                sameSite: 'lax',
-                path: '/',
-                secure: process.env.NODE_ENV === 'production',
-            },
-        },
-    },
     callbacks: {
         async jwt({ token, user }) {
             if (user) {
