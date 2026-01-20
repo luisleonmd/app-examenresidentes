@@ -3,7 +3,7 @@
 import { useEffect, useCallback, useRef } from 'react';
 import { signOut } from 'next-auth/react';
 
-const TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+const TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
 
 export function InactivityMonitor() {
     const timerRef = useRef<NodeJS.Timeout | null>(null);
