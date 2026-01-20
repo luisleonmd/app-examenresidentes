@@ -175,6 +175,11 @@ export async function deleteExam(examId: string) {
                 })
             }
 
+            // Delete Exam Profiles (Assigned Users)
+            await tx.examProfile.deleteMany({
+                where: { exam_id: examId }
+            })
+
             // Finally delete the exam
             await tx.exam.delete({
                 where: { id: examId }
