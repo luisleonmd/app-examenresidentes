@@ -97,6 +97,18 @@ export default function ExamRunnerPage() {
     if (!examData) return <div>Error cargando examen</div>
 
     const currentQ = examData.questions[currentQuestionIndex]
+
+    if (!currentQ) {
+        return (
+            <div className="flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
+                <p>No se encontraron preguntas en este examen.</p>
+                <Button variant="outline" className="mt-4" onClick={() => router.push('/dashboard/exams')}>
+                    Volver a Exámenes
+                </Button>
+            </div>
+        )
+    }
+
     const isLast = currentQuestionIndex === examData.questions.length - 1
 
     return (

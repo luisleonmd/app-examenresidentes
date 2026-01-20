@@ -158,12 +158,10 @@ export async function getExamData(attemptId: string) {
     if (!attempt || attempt.user_id !== session.user.id) throw new Error("Acceso denegado")
 
     // Sort answers by Category Name
-    const sortedAnswers = attempt.answers.sort((a, b) => {
+    const sortedAnswers = [...attempt.answers].sort((a, b) => {
         const catA = a.question.category?.name || '';
         const catB = b.question.category?.name || '';
-        if (catA < catB) return -1;
-        if (catA > catB) return 1;
-        return 0;
+        return catA.localeCompare(catB);
     });
 
     const sanitizedAnswers = sortedAnswers.map(ans => {
