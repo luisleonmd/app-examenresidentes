@@ -29,7 +29,14 @@ export default function LoginForm() {
                     Ingrese su cédula y contraseña para acceder.
                 </CardDescription>
             </CardHeader>
-            <form action={formAction} autoComplete="off">
+            <form
+                action={formAction}
+                autoComplete="off"
+                onSubmit={() => {
+                    // Mark the session as active in this browser tab/window
+                    sessionStorage.setItem('session_active', 'true');
+                }}
+            >
                 <CardContent className="grid gap-4">
                     <div className="grid gap-2">
                         <Label htmlFor="cedula">Cédula</Label>
