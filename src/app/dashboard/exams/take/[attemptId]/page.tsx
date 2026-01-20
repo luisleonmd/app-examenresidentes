@@ -114,6 +114,11 @@ export default function ExamRunnerPage() {
 
             <Card>
                 <CardHeader>
+                    <div className="mb-2">
+                        <span className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80">
+                            {currentQ.categoryName}
+                        </span>
+                    </div>
                     <CardTitle className="leading-relaxed space-y-4">
                         {currentQ.image_url && (
                             <div className="relative w-full max-w-2xl mx-auto mb-4 rounded-lg overflow-hidden border">

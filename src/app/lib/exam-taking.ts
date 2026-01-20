@@ -147,7 +147,9 @@ export async function getExamData(attemptId: string) {
             exam: true,
             answers: {
                 include: {
-                    question: true
+                    question: {
+                        include: { category: true }
+                    }
                 }
             }
         }
@@ -155,15 +157,16 @@ export async function getExamData(attemptId: string) {
 
     if (!attempt || attempt.user_id !== session.user.id) throw new Error("Acceso denegado")
 
-    // Sort answers by creation or just return as is? Prisma order isn't guaranteed without orderBy
-    // But for now it's fine.
+    // Sort answers by Category Name
+    const sortedAnswers = attempt.answers.sort((a, b) => {
+        const catA = a.question.category?.name || '';
+        const catB = b.question.category?.name || '';
+        if (catA < catB) return -1;
+        if (catA > catB) return 1;
+        return 0;
+    });
 
-    //Sanitize: Remove is_correct from options sending to client?
-    //Ideally yes, but for MVP we might send it and hide via CSS/JS logic, but that is insecure.
-    //Let's strip valid answers if we can.
-    //Parsing options JSON is needed.
-
-    const sanitizedAnswers = attempt.answers.map(ans => {
+    const sanitizedAnswers = sortedAnswers.map(ans => {
         const options = JSON.parse(ans.question.options) as any[]
         const sanitizedOptions = options.map(opt => ({
             id: opt.id,
@@ -176,6 +179,7 @@ export async function getExamData(attemptId: string) {
             question_id: ans.question_id,
             question_text: ans.question.text,
             image_url: ans.question.image_url,
+            categoryName: ans.question.category?.name || 'General', // Include Category Name
             options: sanitizedOptions,
             selected_option_id: ans.selected_option_id
         }
