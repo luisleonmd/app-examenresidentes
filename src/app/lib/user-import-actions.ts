@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import * as xlsx from 'xlsx';
 import mammoth from 'mammoth';
-import pdfWithAny from 'pdf-parse';
+const pdfWithAny = require('pdf-parse');
 import { revalidatePath } from 'next/cache';
 
 const prisma = new PrismaClient();
