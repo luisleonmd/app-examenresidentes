@@ -140,11 +140,11 @@ export function CreateExamDialog() {
                                 name="folder_id"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Periodo Académico</FormLabel>
+                                        <FormLabel>Semestre y Año</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
                                                 <SelectTrigger>
-                                                    <SelectValue placeholder="Seleccione Periodo" />
+                                                    <SelectValue placeholder="Seleccione Semestre/Año" />
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
