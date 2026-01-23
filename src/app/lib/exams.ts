@@ -313,8 +313,8 @@ export async function deleteExam(examId: string) {
 
         revalidatePath('/dashboard/exams')
         return { success: true }
-    } catch (error) {
+    } catch (error: any) {
         console.error("Delete exam error:", error)
-        return { success: false, error: "Error al eliminar el examen." }
+        return { success: false, error: "Error: " + (error.message || "Error desconocido al eliminar") }
     }
 }
