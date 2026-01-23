@@ -12,7 +12,6 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger,
-    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { deleteExam, deleteExamsByTitle } from "@/app/lib/exams"
 import { useRouter } from "next/navigation"
