@@ -212,3 +212,41 @@ export async function updateClaimStatus(claimId: string, status: string, notes: 
         return { success: false, error: "Error updating claim" }
     }
 }
+
+export async function getClaimDetail(claimId: string) {
+    const session = await auth()
+    if (!session?.user || (session.user.role !== 'COORDINADOR' && session.user.role !== 'PROFESOR')) {
+        throw new Error("Unauthorized")
+    }
+
+    try {
+        const claim = await prisma.claim.findUnique({
+            where: { id: claimId },
+            include: {
+                question: true,
+                attempt: {
+                    include: {
+                        user: { select: { nombre: true, cedula: true } },
+                        exam: { select: { title: true } }
+                    }
+                }
+            }
+        })
+
+        if (!claim) return null
+
+        // Fetch the specific answer
+        const answer = await prisma.answer.findFirst({
+            where: {
+                attempt_id: claim.attempt_id,
+                question_id: claim.question_id
+            }
+        })
+
+        return { ...claim, answer }
+
+    } catch (e) {
+        console.error(e)
+        throw new Error("Failed to fetch claim details")
+    }
+}
