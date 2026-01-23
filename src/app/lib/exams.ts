@@ -72,18 +72,25 @@ export async function getExamFolders() {
         // Only show folders that have at least one exam visible to the resident
         whereClause.exams = {
             some: {
-                AND: [
+                OR: [
                     {
-                        OR: [
-                            { course_id: null },
-                            { course_id: { in: courseIds } }
+                        AND: [
+                            {
+                                OR: [
+                                    { course_id: null },
+                                    { course_id: { in: courseIds } }
+                                ]
+                            },
+                            {
+                                OR: [
+                                    { profiles: { none: {} } },
+                                    { profiles: { some: { user_id: session.user.id } } }
+                                ]
+                            }
                         ]
                     },
                     {
-                        OR: [
-                            { profiles: { none: {} } },
-                            { profiles: { some: { user_id: session.user.id } } }
-                        ]
+                        attempts: { some: { user_id: session.user.id } }
                     }
                 ]
             }
@@ -125,18 +132,28 @@ export async function getExams(folderId?: string | null) {
 
             // 2. Filter exams: Either no course (General) or enrolled course
             // AND either general exam (no specific profiles) or assigned to this user
-            whereClause.AND = [
+            // 2. Filter exams: 
+            // - Available now (Course/Assignment match)
+            // - OR Previously attempted (History)
+            whereClause.OR = [
                 {
-                    OR: [
-                        { course_id: null },
-                        { course_id: { in: courseIds } }
+                    AND: [
+                        {
+                            OR: [
+                                { course_id: null },
+                                { course_id: { in: courseIds } }
+                            ]
+                        },
+                        {
+                            OR: [
+                                { profiles: { none: {} } }, // General exam
+                                { profiles: { some: { user_id: session.user.id } } } // Assigned to me
+                            ]
+                        }
                     ]
                 },
                 {
-                    OR: [
-                        { profiles: { none: {} } }, // General exam (no specific assignments)
-                        { profiles: { some: { user_id: session.user.id } } } // Assigned specific to me
-                    ]
+                    attempts: { some: { user_id: session.user.id } }
                 }
             ]
         }
