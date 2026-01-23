@@ -271,6 +271,19 @@ export async function deleteExam(examId: string) {
             const attemptIds = attempts.map(a => a.id)
 
             if (attemptIds.length > 0) {
+                // Find claims to delete attachments first
+                const claims = await tx.claim.findMany({
+                    where: { attempt_id: { in: attemptIds } },
+                    select: { id: true }
+                })
+                const claimIds = claims.map(c => c.id)
+
+                if (claimIds.length > 0) {
+                    await tx.claimAttachment.deleteMany({
+                        where: { claim_id: { in: claimIds } }
+                    })
+                }
+
                 // Delete Claims linked to these attempts
                 await tx.claim.deleteMany({
                     where: { attempt_id: { in: attemptIds } }
