@@ -43,7 +43,6 @@ const formSchema = z.object({
     folder_id: z.string().optional(),
     exam_type: z.string({ required_error: "Seleccione un tipo de examen" }),
     categories: z.array(z.string()).min(1, "Seleccione al menos una categoría"),
-    duration_minutes: z.string().refine(val => !isNaN(Number(val)) && Number(val) > 0, "Debe ser un número mayor a 0"),
     total_questions: z.string().refine(val => !isNaN(Number(val)) && Number(val) > 0, "Debe ser mayor a 0"),
     start_window: z.date(),
     end_window: z.date(),
@@ -79,7 +78,6 @@ export function CreateExamDialog({ defaultFolderId }: Props) {
             assigned_to_user_id: "all",
             folder_id: defaultFolderId || "root",
             categories: [],
-            duration_minutes: "60",
             total_questions: "20",
         },
     })
@@ -101,10 +99,15 @@ export function CreateExamDialog({ defaultFolderId }: Props) {
             }
         }
 
+        // Calculate duration in minutes
+        const durationMs = values.end_window.getTime() - values.start_window.getTime()
+        const durationMinutes = Math.floor(durationMs / 60000)
+
         // Convert string dates to Date objects for server
         const payload = {
             ...values,
             title: examTitle,
+            duration_minutes: durationMinutes,
             start_window: values.start_window,
             end_window: values.end_window,
             claims_start: values.claims_start || null,
@@ -272,19 +275,6 @@ export function CreateExamDialog({ defaultFolderId }: Props) {
 
 
                         <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="duration_minutes"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Duración (min)</FormLabel>
-                                        <FormControl>
-                                            <Input type="number" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
                             <FormField
                                 control={form.control}
                                 name="total_questions"
