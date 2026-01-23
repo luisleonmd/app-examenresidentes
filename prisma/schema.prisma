@@ -81,7 +81,7 @@ model Question {
 model Exam {
   id               String   @id @default(uuid())
   title            String
-  title            String
+
   course_id        String?
   course           Course?   @relation(fields: [course_id], references: [id])
   folder_id        String?

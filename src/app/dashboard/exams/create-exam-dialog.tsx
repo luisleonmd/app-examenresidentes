@@ -237,78 +237,44 @@ export function CreateExamDialog() {
                                 </p>
                             )}
                         </div>
-                    </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                            control={form.control}
-                            name="duration_minutes"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Duración (min)</FormLabel>
-                                    <FormControl>
-                                        <Input type="number" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="total_questions"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Cant. Preguntas</FormLabel>
-                                    <FormControl>
-                                        <Input type="number" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                            control={form.control}
-                            name="start_window"
-                            render={({ field }) => (
-                                <FormItem className="flex flex-col">
-                                    <FormLabel>Inicio (Fecha y Hora)</FormLabel>
-                                    <DateTimePicker
-                                        date={field.value}
-                                        setDate={field.onChange}
-                                    />
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <FormField
-                            control={form.control}
-                            name="end_window"
-                            render={({ field }) => (
-                                <FormItem className="flex flex-col">
-                                    <FormLabel>Fin (Fecha y Hora)</FormLabel>
-                                    <DateTimePicker
-                                        date={field.value}
-                                        setDate={field.onChange}
-                                    />
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>
-
-                    <div className="border-t pt-4">
-                        <h4 className="text-sm font-medium mb-4">Periodo de Reclamos (Opcional)</h4>
                         <div className="grid grid-cols-2 gap-4">
                             <FormField
                                 control={form.control}
-                                name="claims_start"
+                                name="duration_minutes"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Duración (min)</FormLabel>
+                                        <FormControl>
+                                            <Input type="number" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="total_questions"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Cant. Preguntas</FormLabel>
+                                        <FormControl>
+                                            <Input type="number" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="start_window"
                                 render={({ field }) => (
                                     <FormItem className="flex flex-col">
-                                        <FormLabel>Inicio Reclamos</FormLabel>
+                                        <FormLabel>Inicio (Fecha y Hora)</FormLabel>
                                         <DateTimePicker
                                             date={field.value}
                                             setDate={field.onChange}
@@ -320,10 +286,10 @@ export function CreateExamDialog() {
 
                             <FormField
                                 control={form.control}
-                                name="claims_end"
+                                name="end_window"
                                 render={({ field }) => (
                                     <FormItem className="flex flex-col">
-                                        <FormLabel>Fin Reclamos</FormLabel>
+                                        <FormLabel>Fin (Fecha y Hora)</FormLabel>
                                         <DateTimePicker
                                             date={field.value}
                                             setDate={field.onChange}
@@ -333,14 +299,48 @@ export function CreateExamDialog() {
                                 )}
                             />
                         </div>
-                    </div>
 
-                    <DialogFooter>
-                        <Button type="submit">Programar Examen</Button>
-                    </DialogFooter>
-                </form>
-            </Form>
-        </DialogContent>
-        </Dialog >
+                        <div className="border-t pt-4">
+                            <h4 className="text-sm font-medium mb-4">Periodo de Reclamos (Opcional)</h4>
+                            <div className="grid grid-cols-2 gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="claims_start"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col">
+                                            <FormLabel>Inicio Reclamos</FormLabel>
+                                            <DateTimePicker
+                                                date={field.value}
+                                                setDate={field.onChange}
+                                            />
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="claims_end"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col">
+                                            <FormLabel>Fin Reclamos</FormLabel>
+                                            <DateTimePicker
+                                                date={field.value}
+                                                setDate={field.onChange}
+                                            />
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+                        </div>
+
+                        <DialogFooter>
+                            <Button type="submit">Programar Examen</Button>
+                        </DialogFooter>
+                    </form>
+                </Form>
+            </DialogContent>
+        </Dialog>
     )
 }
