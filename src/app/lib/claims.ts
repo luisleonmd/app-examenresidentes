@@ -223,15 +223,18 @@ export async function getClaimDetail(claimId: string) {
         const claim = await prisma.claim.findUnique({
             where: { id: claimId },
             include: {
-                question: true,
-                attempt: {
-                    include: {
-                        user: { select: { nombre: true, cedula: true } },
-                        exam: { select: { title: true } }
+                include: {
+                    question: {
+                        include: { category: true }
+                    },
+                    attempt: {
+                        include: {
+                            user: { select: { nombre: true, cedula: true } },
+                            exam: { select: { title: true } }
+                        }
                     }
                 }
-            }
-        })
+            })
 
         if (!claim) return null
 

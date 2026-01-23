@@ -84,7 +84,7 @@ export default function ClaimDetailPage() {
                     <CardTitle>Información del Reclamo</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    <div className="grid grid-cols-2 gap-4 text-sm bg-muted/30 p-4 rounded-lg">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm bg-muted/30 p-4 rounded-lg">
                         <div>
                             <span className="font-semibold block text-muted-foreground">Residente</span>
                             <span className="text-lg">{claim.attempt.user.nombre}</span>
@@ -93,6 +93,12 @@ export default function ClaimDetailPage() {
                         <div>
                             <span className="font-semibold block text-muted-foreground">Examen</span>
                             <span>{claim.attempt.exam.title}</span>
+                        </div>
+                        <div>
+                            <span className="font-semibold block text-muted-foreground">Categoría</span>
+                            <Badge variant="outline" className="mt-1">
+                                {claim.question.category.name}
+                            </Badge>
                         </div>
                     </div>
 
