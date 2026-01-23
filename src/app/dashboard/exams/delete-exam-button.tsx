@@ -12,9 +12,12 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger,
+    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { deleteExam, deleteExamsByTitle } from "@/app/lib/exams"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
+import { Loader2 } from "lucide-react"
 
 export function DeleteExamButton({ examId, examTitle, duplicateCount = 0 }: { examId: string, examTitle: string, duplicateCount?: number }) {
     const [loading, setLoading] = useState(false)
