@@ -118,16 +118,25 @@ export default async function ExamsPage(props: Props) {
                             </TableRow>
                         ) : (() => {
                             const titleCounts = exams.reduce((acc: any, curr: any) => {
-                                acc[curr.title] = (acc[curr.title] || 0) + 1
+                                const key = curr.title.trim()
+                                acc[key] = (acc[key] || 0) + 1
                                 return acc
                             }, {})
                             return exams.map((e) => {
                                 const exam = e as any;
+                                // Normalized count
+                                const count = titleCounts[exam.title.trim()] || 1;
+
                                 return (
                                     <TableRow key={exam.id}>
                                         <TableCell className="font-medium">
                                             {exam.title}
                                             <span className="block text-[10px] text-muted-foreground font-mono">{exam.id.slice(0, 8)}</span>
+                                            {count > 1 && (
+                                                <span className="ml-2 inline-flex items-center rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-xs font-semibold text-red-700">
+                                                    {count} copias
+                                                </span>
+                                            )}
                                         </TableCell>
                                         <TableCell>
                                             {/* @ts-ignore */}
@@ -163,7 +172,7 @@ export default async function ExamsPage(props: Props) {
                                                         <DeleteExamButton
                                                             examId={exam.id}
                                                             examTitle={exam.title}
-                                                            duplicateCount={titleCounts[exam.title] || 1}
+                                                            duplicateCount={count}
                                                         />
                                                     )}
                                                 </div>
