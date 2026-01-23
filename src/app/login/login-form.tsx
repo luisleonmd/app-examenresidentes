@@ -1,6 +1,7 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { authenticate } from '@/app/lib/actions';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,6 +17,10 @@ import { Label } from '@/components/ui/label';
 import { ForgotPasswordDialog } from './forgot-password-dialog';
 
 export default function LoginForm() {
+    const searchParams = useSearchParams();
+    const reason = searchParams.get('reason');
+    const [timeoutMessage, setTimeoutMessage] = useState(reason === 'timeout' ? 'Se ha desconectado por inactividad.' : '');
+
     const [errorMessage, formAction, isPending] = useActionState(
         authenticate,
         undefined
@@ -63,6 +68,11 @@ export default function LoginForm() {
                     {errorMessage && (
                         <div className="text-sm text-red-500 font-medium">
                             {errorMessage}
+                        </div>
+                    )}
+                    {timeoutMessage && (
+                        <div className="text-sm text-yellow-600 font-medium">
+                            {timeoutMessage}
                         </div>
                     )}
                 </CardContent>

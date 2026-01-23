@@ -1,66 +1,78 @@
-"use client";
-
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { signOut } from "next-auth/react";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
-const TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+const TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
+const WARNING_MS = 12 * 60 * 1000; // 12 minutes (Warning appears 3 mins before timeout)
 
 export function SessionTimeout() {
-    const timerRef = useRef<NodeJS.Timeout>(null);
+    const [showWarning, setShowWarning] = useState(false);
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
+    const warningTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     const resetTimer = useCallback(() => {
-        if (timerRef.current) {
-            clearTimeout(timerRef.current);
-        }
+        if (timerRef.current) clearTimeout(timerRef.current);
+        if (warningTimerRef.current) clearTimeout(warningTimerRef.current);
 
+        setShowWarning(false);
+
+        // Warning Timer (Logic: 12 minutes)
+        warningTimerRef.current = setTimeout(() => {
+            setShowWarning(true);
+        }, WARNING_MS);
+
+        // Session Kill Timer (Logic: 15 minutes)
         timerRef.current = setTimeout(() => {
-            // Use client-side signOut, redirect to login
-            signOut({ callbackUrl: "/login" });
+            signOut({ callbackUrl: "/login?reason=timeout" });
         }, TIMEOUT_MS);
     }, []);
 
     useEffect(() => {
-        // Events to track activity
-        const events = [
-            "mousedown",
-            "mousemove",
-            "keydown",
-            "scroll",
-            "touchstart",
-            "click",
-        ];
+        const events = ["mousedown", "mousemove", "keydown", "scroll", "touchstart", "click"];
 
-        // Initial timer set
-        resetTimer();
-
-        // Event handler wrapper to throttle/debounce could be added, 
-        // but for simple reset on activity, direct call is okay if not too frequent.
-        // However, mousemove fires very rapidly. Let's throttle it slightly or use a flag.
         let isActivityThrottle = false;
-
         const handleActivity = () => {
             if (!isActivityThrottle) {
                 isActivityThrottle = true;
                 resetTimer();
-                setTimeout(() => {
-                    isActivityThrottle = false;
-                }, 1000); // 1 second throttle
+                setTimeout(() => isActivityThrottle = false, 1000);
             }
         };
 
-        events.forEach((event) => {
-            window.addEventListener(event, handleActivity);
-        });
+        events.forEach((event) => window.addEventListener(event, handleActivity));
+        resetTimer();
 
         return () => {
-            if (timerRef.current) {
-                clearTimeout(timerRef.current);
-            }
-            events.forEach((event) => {
-                window.removeEventListener(event, handleActivity);
-            });
+            if (timerRef.current) clearTimeout(timerRef.current);
+            if (warningTimerRef.current) clearTimeout(warningTimerRef.current);
+            events.forEach((event) => window.removeEventListener(event, handleActivity));
         };
     }, [resetTimer]);
 
-    return null;
+    return (
+        <AlertDialog open={showWarning} onOpenChange={setShowWarning}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>¿Sigues ahí?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        Su sesión se cerrará en menos de 3 minutos por inactividad.
+                        Mueva el cursor o presione una tecla para continuar conectado.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogAction onClick={resetTimer}>
+                        Seguir Conectado
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+    );
 }
