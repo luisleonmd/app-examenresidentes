@@ -17,6 +17,7 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { DeleteExamButton } from "./delete-exam-button"
 import { Folder, ArrowLeft, Trash2, FolderPlus } from "lucide-react"
 import { CreateFolderDialog } from "./create-folder-dialog"
+import { FolderActions } from "./folder-actions"
 
 export const dynamic = 'force-dynamic'
 
@@ -87,17 +88,9 @@ export default async function ExamsPage(props: Props) {
                                 </div>
                             </div>
                             {isCoordinator && (
-                                <form action={async () => {
-                                    "use server"
-                                    if (confirm("Eliminar carpeta?")) {
-                                        await deleteExamFolder(folder.id)
-                                    }
-                                    // Note: native confirm doesn't work in server action form usually without JS or client component.
-                                    // For now, let's just put a simple server action button, but ideally this should be a client component.
-                                    // See "DeleteFolderButton" below.
-                                }} className="z-10">
-                                    {/* Placeholder for delete, actually better to use a small client component */}
-                                </form>
+                                <div className="z-10 relative">
+                                    <FolderActions folder={folder} />
+                                </div>
                             )}
                         </div>
                     ))}

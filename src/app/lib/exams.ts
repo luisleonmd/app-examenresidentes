@@ -30,6 +30,23 @@ export async function createExamFolder(name: string) {
     }
 }
 
+export async function updateExamFolder(id: string, name: string) {
+    const session = await auth()
+    if (!session?.user || session.user.role !== 'COORDINADOR') {
+        return { success: false, error: "Unauthorized" }
+    }
+    try {
+        await prisma.examFolder.update({
+            where: { id },
+            data: { name }
+        })
+        revalidatePath('/dashboard/exams')
+        return { success: true }
+    } catch (e) {
+        return { success: false, error: "Failed to update folder" }
+    }
+}
+
 export async function deleteExamFolder(id: string) {
     const session = await auth()
     if (!session?.user || session.user.role !== 'COORDINADOR') {
