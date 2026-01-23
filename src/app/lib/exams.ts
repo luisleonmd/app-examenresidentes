@@ -315,6 +315,9 @@ export async function deleteExam(examId: string) {
         return { success: true }
     } catch (error: any) {
         console.error("Delete exam error:", error)
-        return { success: false, error: "Error: " + (error.message || "Error desconocido al eliminar") }
+        return {
+            success: false,
+            error: `Error: ${error.message || "Desconocido"} (Código: ${error.code || 'N/A'})`
+        }
     }
 }
