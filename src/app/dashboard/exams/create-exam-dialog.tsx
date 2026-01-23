@@ -62,7 +62,11 @@ const EXAM_TYPES = [
     "Examen General"
 ]
 
-export function CreateExamDialog() {
+interface Props {
+    defaultFolderId?: string
+}
+
+export function CreateExamDialog({ defaultFolderId }: Props) {
     const [open, setOpen] = useState(false)
     const [residents, setResidents] = useState<any[]>([])
     const [categories, setCategories] = useState<any[]>([])
@@ -73,7 +77,7 @@ export function CreateExamDialog() {
         resolver: zodResolver(formSchema),
         defaultValues: {
             assigned_to_user_id: "all",
-            folder_id: "root",
+            folder_id: defaultFolderId || "root",
             categories: [],
             duration_minutes: "60",
             total_questions: "20",

@@ -68,7 +68,7 @@ export default async function ExamsPage(props: Props) {
                 {!isResident && (
                     <div className="flex gap-2">
                         {!folderId && <CreateFolderDialog />}
-                        <CreateExamDialog />
+                        <CreateExamDialog defaultFolderId={folderId} />
                     </div>
                 )}
             </div>
