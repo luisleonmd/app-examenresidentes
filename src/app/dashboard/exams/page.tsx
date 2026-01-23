@@ -172,7 +172,7 @@ export default async function ExamsPage(props: Props) {
                                     </TableRow>
                                 )
                             })
-                        }
+                        })()}
                     </TableBody>
                 </Table>
             </div>
