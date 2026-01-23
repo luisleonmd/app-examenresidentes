@@ -127,7 +127,10 @@ export default async function ExamsPage(props: Props) {
                             const exam = e as any;
                             return (
                                 <TableRow key={exam.id}>
-                                    <TableCell className="font-medium">{exam.title}</TableCell>
+                                    <TableCell className="font-medium">
+                                        {exam.title}
+                                        <span className="block text-[10px] text-muted-foreground font-mono">{exam.id.slice(0, 8)}</span>
+                                    </TableCell>
                                     <TableCell>
                                         {/* @ts-ignore */}
                                         {exam.profiles && exam.profiles.length > 0

@@ -22,6 +22,7 @@ export function DeleteExamButton({ examId }: { examId: string }) {
         if (!result.success) {
             alert(result.error)
         } else {
+            alert("Examen eliminado correctamente.")
             router.refresh()
         }
         setLoading(false)
