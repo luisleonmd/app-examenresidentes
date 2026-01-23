@@ -18,6 +18,8 @@ import { DeleteExamButton } from "./delete-exam-button"
 import { Folder, ArrowLeft, Trash2, FolderPlus } from "lucide-react"
 import { CreateFolderDialog } from "./create-folder-dialog"
 
+export const dynamic = 'force-dynamic'
+
 interface Props {
     searchParams: Promise<{ folderId?: string }>
 }

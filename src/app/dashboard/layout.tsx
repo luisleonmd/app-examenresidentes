@@ -13,6 +13,8 @@ import { SearchButton } from "@/components/search-button"
 import { NotificationsBell } from "@/components/notifications-bell"
 import { ChangePasswordDialog } from "@/components/change-password-dialog"
 
+export const dynamic = 'force-dynamic'
+
 export default async function DashboardLayout({
     children,
 }: {
