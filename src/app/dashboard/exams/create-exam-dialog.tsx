@@ -212,131 +212,97 @@ export function CreateExamDialog() {
                                 </FormItem>
                             )}
                         />
-                    </div>
 
-                    <div className="space-y-2">
-                        <Label>Categorías de Preguntas</Label>
-                        <Input
-                            placeholder="Buscar categoría..."
-                            value={categorySearch}
-                            onChange={(e) => setCategorySearch(e.target.value)}
-                            className="mb-2"
-                        />
-                        <ScrollArea className="h-[120px] w-full border rounded-md p-2">
-                            {categories
-                                .filter(cat => cat.name.toLowerCase().includes(categorySearch.toLowerCase()))
-                                .map((cat) => (
-                                    <FormField
-                                        key={cat.id}
-                                        control={form.control}
-                                        name="categories"
-                                        render={({ field }) => {
-                                            return (
-                                                <FormItem
-                                                    key={cat.id}
-                                                    className="flex flex-row items-start space-x-3 space-y-0 py-1"
-                                                >
-                                                    <FormControl>
-                                                        <Checkbox
-                                                            checked={field.value?.includes(cat.id)}
-                                                            onCheckedChange={(checked) => {
-                                                                return checked
-                                                                    ? field.onChange([...field.value, cat.id])
-                                                                    : field.onChange(
-                                                                        field.value?.filter(
-                                                                            (value) => value !== cat.id
+
+                        <div className="space-y-2">
+                            <Label>Categorías de Preguntas</Label>
+                            <Input
+                                placeholder="Buscar categoría..."
+                                value={categorySearch}
+                                onChange={(e) => setCategorySearch(e.target.value)}
+                                className="mb-2"
+                            />
+                            <ScrollArea className="h-[120px] w-full border rounded-md p-2">
+                                {categories
+                                    .filter(cat => cat.name.toLowerCase().includes(categorySearch.toLowerCase()))
+                                    .map((cat) => (
+                                        <FormField
+                                            key={cat.id}
+                                            control={form.control}
+                                            name="categories"
+                                            render={({ field }) => {
+                                                return (
+                                                    <FormItem
+                                                        key={cat.id}
+                                                        className="flex flex-row items-start space-x-3 space-y-0 py-1"
+                                                    >
+                                                        <FormControl>
+                                                            <Checkbox
+                                                                checked={field.value?.includes(cat.id)}
+                                                                onCheckedChange={(checked) => {
+                                                                    return checked
+                                                                        ? field.onChange([...field.value, cat.id])
+                                                                        : field.onChange(
+                                                                            field.value?.filter(
+                                                                                (value) => value !== cat.id
+                                                                            )
                                                                         )
-                                                                    )
-                                                            }}
-                                                        />
-                                                    </FormControl>
-                                                    <FormLabel className="font-normal cursor-pointer">
-                                                        {cat.name}
-                                                    </FormLabel>
-                                                </FormItem>
-                                            )
-                                        }}
-                                    />
-                                ))}
-                        </ScrollArea>
-                        {form.formState.errors.categories && (
-                            <p className="text-sm font-medium text-destructive">
-                                {form.formState.errors.categories.message}
-                            </p>
-                        )}
-                    </div>
-
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                            control={form.control}
-                            name="duration_minutes"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Duración (min)</FormLabel>
-                                    <FormControl>
-                                        <Input type="number" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
+                                                                }}
+                                                            />
+                                                        </FormControl>
+                                                        <FormLabel className="font-normal cursor-pointer">
+                                                            {cat.name}
+                                                        </FormLabel>
+                                                    </FormItem>
+                                                )
+                                            }}
+                                        />
+                                    ))}
+                            </ScrollArea>
+                            {form.formState.errors.categories && (
+                                <p className="text-sm font-medium text-destructive">
+                                    {form.formState.errors.categories.message}
+                                </p>
                             )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="total_questions"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Cant. Preguntas</FormLabel>
-                                    <FormControl>
-                                        <Input type="number" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>
+                        </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                            control={form.control}
-                            name="start_window"
-                            render={({ field }) => (
-                                <FormItem className="flex flex-col">
-                                    <FormLabel>Inicio (Fecha y Hora)</FormLabel>
-                                    <DateTimePicker
-                                        date={field.value}
-                                        setDate={field.onChange}
-                                    />
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
 
-                        <FormField
-                            control={form.control}
-                            name="end_window"
-                            render={({ field }) => (
-                                <FormItem className="flex flex-col">
-                                    <FormLabel>Fin (Fecha y Hora)</FormLabel>
-                                    <DateTimePicker
-                                        date={field.value}
-                                        setDate={field.onChange}
-                                    />
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>
-
-                    <div className="border-t pt-4">
-                        <h4 className="text-sm font-medium mb-4">Periodo de Reclamos (Opcional)</h4>
                         <div className="grid grid-cols-2 gap-4">
                             <FormField
                                 control={form.control}
-                                name="claims_start"
+                                name="duration_minutes"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Duración (min)</FormLabel>
+                                        <FormControl>
+                                            <Input type="number" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="total_questions"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Cant. Preguntas</FormLabel>
+                                        <FormControl>
+                                            <Input type="number" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="start_window"
                                 render={({ field }) => (
                                     <FormItem className="flex flex-col">
-                                        <FormLabel>Inicio Reclamos</FormLabel>
+                                        <FormLabel>Inicio (Fecha y Hora)</FormLabel>
                                         <DateTimePicker
                                             date={field.value}
                                             setDate={field.onChange}
@@ -348,10 +314,10 @@ export function CreateExamDialog() {
 
                             <FormField
                                 control={form.control}
-                                name="claims_end"
+                                name="end_window"
                                 render={({ field }) => (
                                     <FormItem className="flex flex-col">
-                                        <FormLabel>Fin Reclamos</FormLabel>
+                                        <FormLabel>Fin (Fecha y Hora)</FormLabel>
                                         <DateTimePicker
                                             date={field.value}
                                             setDate={field.onChange}
@@ -361,14 +327,48 @@ export function CreateExamDialog() {
                                 )}
                             />
                         </div>
-                    </div>
 
-                    <DialogFooter>
-                        <Button type="submit">Programar Examen</Button>
-                    </DialogFooter>
-                </form>
-            </Form>
-        </DialogContent>
-        </Dialog >
+                        <div className="border-t pt-4">
+                            <h4 className="text-sm font-medium mb-4">Periodo de Reclamos (Opcional)</h4>
+                            <div className="grid grid-cols-2 gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="claims_start"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col">
+                                            <FormLabel>Inicio Reclamos</FormLabel>
+                                            <DateTimePicker
+                                                date={field.value}
+                                                setDate={field.onChange}
+                                            />
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="claims_end"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col">
+                                            <FormLabel>Fin Reclamos</FormLabel>
+                                            <DateTimePicker
+                                                date={field.value}
+                                                setDate={field.onChange}
+                                            />
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+                        </div>
+
+                        <DialogFooter>
+                            <Button type="submit">Programar Examen</Button>
+                        </DialogFooter>
+                    </form>
+                </Form>
+            </DialogContent>
+        </Dialog>
     )
 }
