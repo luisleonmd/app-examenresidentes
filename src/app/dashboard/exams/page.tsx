@@ -116,53 +116,63 @@ export default async function ExamsPage(props: Props) {
                                     {folderId ? "No hay exámenes en esta carpeta." : "No hay exámenes sin carpeta."}
                                 </TableCell>
                             </TableRow>
-                        ) : exams.map((e) => {
-                            const exam = e as any;
-                            return (
-                                <TableRow key={exam.id}>
-                                    <TableCell className="font-medium">
-                                        {exam.title}
-                                        <span className="block text-[10px] text-muted-foreground font-mono">{exam.id.slice(0, 8)}</span>
-                                    </TableCell>
-                                    <TableCell>
-                                        {/* @ts-ignore */}
-                                        {exam.profiles && exam.profiles.length > 0
-                                            // @ts-ignore
-                                            ? exam.profiles.map(p => p.user.nombre).join(", ")
-                                            : "General"}
-                                    </TableCell>
-                                    {!isResident && <TableCell>{exam.creator?.nombre}</TableCell>}
-                                    <TableCell className="text-sm">
-                                        {format(new Date(exam.start_window), "dd MMM", { locale: es })} - {format(new Date(exam.end_window), "dd MMM yyyy", { locale: es })}
-                                    </TableCell>
-                                    <TableCell>{exam.total_questions}</TableCell>
-                                    <TableCell className="text-right">
-                                        {isResident ? (
-                                            <StartExamDialog
-                                                examId={exam.id}
-                                                attempt={exam.userAttempt}
-                                                startWindow={new Date(exam.start_window)}
-                                                endWindow={new Date(exam.end_window)}
-                                                claimsEnd={exam.claims_end ? new Date(exam.claims_end) : null}
-                                            />
-                                        ) : (
-                                            <div className="flex gap-2 justify-end">
-                                                <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold hover:bg-secondary/80">
-                                                    Programado
-                                                </span>
-                                                {/* Link to results for professors */}
-                                                <Button asChild size="sm" variant="outline">
-                                                    <a href={`/dashboard/exams/${exam.id}/results`}>Resultados</a>
-                                                </Button>
-                                                {session?.user?.role === 'COORDINADOR' && (
-                                                    <DeleteExamButton examId={exam.id} />
-                                                )}
-                                            </div>
-                                        )}
-                                    </TableCell>
-                                </TableRow>
-                            )
-                        })}
+                        ) : (() => {
+                            const titleCounts = exams.reduce((acc: any, curr: any) => {
+                                acc[curr.title] = (acc[curr.title] || 0) + 1
+                                return acc
+                            }, {})
+                            return exams.map((e) => {
+                                const exam = e as any;
+                                return (
+                                    <TableRow key={exam.id}>
+                                        <TableCell className="font-medium">
+                                            {exam.title}
+                                            <span className="block text-[10px] text-muted-foreground font-mono">{exam.id.slice(0, 8)}</span>
+                                        </TableCell>
+                                        <TableCell>
+                                            {/* @ts-ignore */}
+                                            {exam.profiles && exam.profiles.length > 0
+                                                // @ts-ignore
+                                                ? exam.profiles.map(p => p.user.nombre).join(", ")
+                                                : "General"}
+                                        </TableCell>
+                                        {!isResident && <TableCell>{exam.creator?.nombre}</TableCell>}
+                                        <TableCell className="text-sm">
+                                            {format(new Date(exam.start_window), "dd MMM", { locale: es })} - {format(new Date(exam.end_window), "dd MMM yyyy", { locale: es })}
+                                        </TableCell>
+                                        <TableCell>{exam.total_questions}</TableCell>
+                                        <TableCell className="text-right">
+                                            {isResident ? (
+                                                <StartExamDialog
+                                                    examId={exam.id}
+                                                    attempt={exam.userAttempt}
+                                                    startWindow={new Date(exam.start_window)}
+                                                    endWindow={new Date(exam.end_window)}
+                                                    claimsEnd={exam.claims_end ? new Date(exam.claims_end) : null}
+                                                />
+                                            ) : (
+                                                <div className="flex gap-2 justify-end">
+                                                    <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold hover:bg-secondary/80">
+                                                        Programado
+                                                    </span>
+                                                    {/* Link to results for professors */}
+                                                    <Button asChild size="sm" variant="outline">
+                                                        <a href={`/dashboard/exams/${exam.id}/results`}>Resultados</a>
+                                                    </Button>
+                                                    {session?.user?.role === 'COORDINADOR' && (
+                                                        <DeleteExamButton
+                                                            examId={exam.id}
+                                                            examTitle={exam.title}
+                                                            duplicateCount={titleCounts[exam.title] || 1}
+                                                        />
+                                                    )}
+                                                </div>
+                                            )}
+                                        </TableCell>
+                                    </TableRow>
+                                )
+                            })
+                        }
                     </TableBody>
                 </Table>
             </div>
