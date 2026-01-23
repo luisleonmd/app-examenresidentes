@@ -146,6 +146,7 @@ async function main() {
             }
         }
 
+        /*
         // Create Exam
         console.log('Seeding exam...')
         const examTitle = "Examen Parcial Medicina Interna"
@@ -169,6 +170,7 @@ async function main() {
                 }
             })
         }
+        */
     }
 
     console.log('Seeding finished.')
