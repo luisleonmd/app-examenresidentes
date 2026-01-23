@@ -338,3 +338,69 @@ export async function deleteExam(examId: string) {
         }
     }
 }
+
+export async function deleteExamsByTitle(title: string) {
+    const session = await auth()
+    if (!session?.user || session.user.role !== 'COORDINADOR') {
+        return { success: false, error: "Unauthorized" }
+    }
+
+    try {
+        await prisma.$transaction(async (tx) => {
+            // Find ALL exams with this title
+            const exams = await tx.exam.findMany({
+                where: { title: title },
+                select: { id: true }
+            })
+            const examIds = exams.map(e => e.id)
+
+            if (examIds.length === 0) return
+
+            // 1. Attempts
+            const attempts = await tx.examAttempt.findMany({
+                where: { exam_id: { in: examIds } },
+                select: { id: true }
+            })
+            const attemptIds = attempts.map(a => a.id)
+
+            if (attemptIds.length > 0) {
+                // Attachments
+                const claims = await tx.claim.findMany({
+                    where: { attempt_id: { in: attemptIds } },
+                    select: { id: true }
+                })
+                const claimIds = claims.map(c => c.id)
+
+                if (claimIds.length > 0) {
+                    await tx.claimAttachment.deleteMany({
+                        where: { claim_id: { in: claimIds } }
+                    })
+                }
+
+                // Claims, Answers, Attempts
+                await tx.claim.deleteMany({ where: { attempt_id: { in: attemptIds } } })
+                await tx.answer.deleteMany({ where: { attempt_id: { in: attemptIds } } })
+                await tx.examAttempt.deleteMany({ where: { exam_id: { in: examIds } } })
+            }
+
+            // 2. Profiles (Assignments)
+            await tx.examProfile.deleteMany({
+                where: { exam_id: { in: examIds } }
+            })
+
+            // 3. Exams
+            await tx.exam.deleteMany({
+                where: { id: { in: examIds } }
+            })
+        })
+
+        revalidatePath('/dashboard/exams')
+        return { success: true }
+    } catch (error: any) {
+        console.error("Bulk delete exam error:", error)
+        return {
+            success: false,
+            error: `Error: ${error.message || "Desconocido"}`
+        }
+    }
+}
