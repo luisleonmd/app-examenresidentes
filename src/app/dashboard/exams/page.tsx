@@ -52,6 +52,8 @@ export default async function ExamsPage(props: Props) {
     // If in root view (no folderId), show folders
     // If in folder view, show "Back" button and folder title
 
+    const canManageExams = isCoordinator || (session?.user?.permissions?.includes('MANAGE_EXAMS') ?? false);
+
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
@@ -66,7 +68,7 @@ export default async function ExamsPage(props: Props) {
                     </h1>
                 </div>
 
-                {!isResident && (
+                {canManageExams && (
                     <div className="flex gap-2">
                         {!folderId && <CreateFolderDialog />}
                         <CreateExamDialog defaultFolderId={folderId} />

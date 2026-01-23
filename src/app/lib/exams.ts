@@ -18,7 +18,13 @@ export async function getCourses() {
 // Folders
 export async function createExamFolder(name: string) {
     const session = await auth()
-    if (!session?.user || session.user.role !== 'COORDINADOR') {
+    const isCoordinator = session?.user?.role === 'COORDINADOR';
+    // Ideally only Coordinators manage folders structure? Or allow Exam Managers too? 
+    // Let's stick to Coordinators only for folders structure to keep it clean, 
+    // or allow MANAGE_EXAMS. Let's allow MANAGE_EXAMS so they can organize their work.
+    const hasPermission = session?.user?.permissions?.includes('MANAGE_EXAMS');
+
+    if (!session?.user || (!isCoordinator && !hasPermission)) {
         return { success: false, error: "Unauthorized" }
     }
     try {
@@ -280,7 +286,12 @@ export async function getExams(folderId?: string | null) {
 
 export async function createExam(data: any) {
     const session = await auth()
-    if (!session?.user) return { success: false, error: "Unauthorized" }
+    const isCoordinator = session?.user?.role === 'COORDINADOR';
+    const hasPermission = session?.user?.permissions?.includes('MANAGE_EXAMS');
+
+    if (!session?.user || (!isCoordinator && !hasPermission)) {
+        return { success: false, error: "Unauthorized" }
+    }
 
     try {
         const exam = await prisma.exam.create({

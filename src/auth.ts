@@ -27,6 +27,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
             if (user) {
                 token.id = user.id;
                 token.role = user.role;
+                token.permissions = user.permissions;
                 token.cedula = user.cedula;
                 token.nombre = user.nombre;
             }
@@ -36,6 +37,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
             if (token && session.user) {
                 session.user.id = token.id as string;
                 session.user.role = token.role as string;
+                session.user.permissions = token.permissions as string | null;
                 session.user.cedula = token.cedula as string;
                 session.user.nombre = token.nombre as string;
             }

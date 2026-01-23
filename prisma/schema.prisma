@@ -15,6 +15,7 @@ model User {
   nombre            String
   email             String?      @unique // Optional initially to allow existing users
   role              String       // COORDINADOR, PROFESOR, RESIDENTE
+  permissions       String?      // JSON List: ["MANAGE_EXAMS", "MANAGE_QUESTIONS"]
   password_hash     String
   must_change_password Boolean   @default(false)
   two_factor_secret String?

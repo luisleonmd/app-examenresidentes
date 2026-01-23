@@ -56,7 +56,12 @@ export async function getQuestions(categoryId?: string) {
 
 export async function createQuestion(data: any) {
     const session = await auth()
-    if (!session?.user) return { success: false, error: "Unauthorized" }
+    const isCoordinator = session?.user?.role === 'COORDINADOR';
+    const hasPermission = session?.user?.permissions?.includes('MANAGE_QUESTIONS');
+
+    if (!session?.user || (!isCoordinator && !hasPermission)) {
+        return { success: false, error: "Unauthorized" }
+    }
 
     try {
         await prisma.question.create({
@@ -98,7 +103,12 @@ import { join } from "path"
 
 export async function updateQuestion(formData: FormData) {
     const session = await auth()
-    if (!session?.user || (session.user.role !== 'COORDINADOR' && session.user.role !== 'PROFESOR')) {
+
+    // Check permissions
+    const isCoordinator = session?.user?.role === 'COORDINADOR';
+    const hasPermission = session?.user?.permissions?.includes('MANAGE_QUESTIONS');
+
+    if (!session?.user || (!isCoordinator && !hasPermission)) {
         return { success: false, error: "Unauthorized" }
     }
 
