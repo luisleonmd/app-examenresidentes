@@ -59,7 +59,42 @@ export async function deleteExamFolder(id: string) {
 }
 
 export async function getExamFolders() {
-    return await prisma.examFolder.findMany({ orderBy: { created_at: 'desc' }, include: { _count: { select: { exams: true } } } })
+    const session = await auth()
+    const whereClause: any = {}
+
+    if (session?.user?.role === 'RESIDENTE') {
+        const enrollments = await prisma.enrollment.findMany({
+            where: { user_id: session.user.id },
+            select: { course_id: true }
+        })
+        const courseIds = enrollments.map(e => e.course_id)
+
+        // Only show folders that have at least one exam visible to the resident
+        whereClause.exams = {
+            some: {
+                AND: [
+                    {
+                        OR: [
+                            { course_id: null },
+                            { course_id: { in: courseIds } }
+                        ]
+                    },
+                    {
+                        OR: [
+                            { profiles: { none: {} } },
+                            { profiles: { some: { user_id: session.user.id } } }
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+
+    return await prisma.examFolder.findMany({
+        where: whereClause,
+        orderBy: { created_at: 'desc' },
+        include: { _count: { select: { exams: true } } }
+    })
 }
 
 export async function getExams(folderId?: string | null) {
