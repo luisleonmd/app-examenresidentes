@@ -30,7 +30,8 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { deleteExamFolder, updateExamFolder } from "@/app/lib/exams"
+import { deleteExamFolder, updateExamFolder, moveFolder } from "@/app/lib/exams"
+import { ArrowUp, ArrowDown } from "lucide-react"
 
 interface Folder {
     id: string
@@ -44,6 +45,18 @@ export function FolderActions({ folder }: { folder: Folder }) {
     const [loading, setLoading] = useState(false)
     const [newName, setNewName] = useState(folder.name)
     const router = useRouter()
+
+    async function handleMove(direction: 'up' | 'down') {
+        setLoading(true)
+        const result = await moveFolder(folder.id, direction)
+        if (result.success) {
+            router.refresh()
+            setOpenDropdown(false)
+        } else {
+            alert("No se pudo mover la carpeta")
+        }
+        setLoading(false)
+    }
 
     async function handleRename() {
         if (!newName.trim()) return
@@ -85,6 +98,14 @@ export function FolderActions({ folder }: { folder: Folder }) {
                     <DropdownMenuItem onSelect={() => setShowEditDialog(true)}>
                         <Pencil className="mr-2 h-4 w-4" />
                         Editar Nombre
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => handleMove('up')}>
+                        <ArrowUp className="mr-2 h-4 w-4" />
+                        Mover Antes (Izq)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => handleMove('down')}>
+                        <ArrowDown className="mr-2 h-4 w-4" />
+                        Mover Después (Der)
                     </DropdownMenuItem>
                     <DropdownMenuItem onSelect={() => setShowDeleteAlert(true)} className="text-red-600 focus:text-red-600">
                         <Trash2 className="mr-2 h-4 w-4" />

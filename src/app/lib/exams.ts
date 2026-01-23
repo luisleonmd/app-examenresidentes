@@ -116,9 +116,68 @@ export async function getExamFolders() {
 
     return await prisma.examFolder.findMany({
         where: whereClause,
-        orderBy: { created_at: 'desc' },
+        orderBy: [
+            { rank: 'asc' },
+            { created_at: 'desc' }
+        ],
         include: { _count: { select: { exams: true } } }
     })
+}
+
+export async function moveFolder(folderId: string, direction: 'up' | 'down') {
+    const session = await auth()
+    if (!session?.user || session.user.role !== 'COORDINADOR') {
+        return { success: false, error: "Unauthorized" }
+    }
+
+    try {
+        // 1. Get all folders in current order
+        const folders = await prisma.examFolder.findMany({
+            orderBy: [
+                { rank: 'asc' },
+                { created_at: 'desc' }
+            ]
+        })
+
+        const currentIndex = folders.findIndex(f => f.id === folderId)
+        if (currentIndex === -1) return { success: false, error: "Folder not found" }
+
+        // 2. Identify target index
+        const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
+
+        // Check bounds
+        if (targetIndex < 0 || targetIndex >= folders.length) {
+            return { success: true } // Already at top/bottom
+        }
+
+        // 3. Swap ranks
+        // We'll normalize ranks to be their index first to ensure continuity, then swap.
+        // Actually, just assigning index as rank for all is clean and self-healing.
+
+        const folderA = folders[currentIndex]
+        const folderB = folders[targetIndex]
+
+        // Swap their positions in the array
+        folders[currentIndex] = folderB
+        folders[targetIndex] = folderA
+
+        // Transaction to update all ranks (or just the two? All is safer to heal gaps)
+        await prisma.$transaction(
+            folders.map((folder, index) =>
+                prisma.examFolder.update({
+                    where: { id: folder.id },
+                    data: { rank: index }
+                })
+            )
+        )
+
+        revalidatePath('/dashboard/exams')
+        return { success: true }
+
+    } catch (e) {
+        console.error("Failed to move folder", e)
+        return { success: false, error: "Failed to move folder" }
+    }
 }
 
 export async function getExams(folderId?: string | null) {
