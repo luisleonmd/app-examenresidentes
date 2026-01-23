@@ -81,8 +81,11 @@ model Question {
 model Exam {
   id               String   @id @default(uuid())
   title            String
+  title            String
   course_id        String?
   course           Course?   @relation(fields: [course_id], references: [id])
+  folder_id        String?
+  folder           ExamFolder? @relation(fields: [folder_id], references: [id])
   categories       String // JSON list of Category IDs
   created_by       String
   creator          User     @relation(fields: [created_by], references: [id])
@@ -183,4 +186,12 @@ model StudyResource {
   file_data   String?  // Base64 encoded file data for persistence (limit size in UI)
   file_type   String?  // Mime type
   created_at  DateTime @default(now())
+}
+
+model ExamFolder {
+  id          String   @id @default(uuid())
+  name        String
+  created_at  DateTime @default(now())
+
+  exams       Exam[]
 }

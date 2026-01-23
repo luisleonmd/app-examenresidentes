@@ -15,11 +15,70 @@ export async function getCourses() {
     }
 }
 
-export async function getExams() {
+// Folders
+export async function createExamFolder(name: string) {
+    const session = await auth()
+    if (!session?.user || session.user.role !== 'COORDINADOR') {
+        return { success: false, error: "Unauthorized" }
+    }
+    try {
+        await prisma.examFolder.create({ data: { name } })
+        revalidatePath('/dashboard/exams')
+        return { success: true }
+    } catch (e) {
+        return { success: false, error: "Failed to create folder" }
+    }
+}
+
+export async function deleteExamFolder(id: string) {
+    const session = await auth()
+    if (!session?.user || session.user.role !== 'COORDINADOR') {
+        return { success: false, error: "Unauthorized" }
+    }
+    try {
+        // Check if has exams? cascade delete exams? 
+        // Safe approach: only if empty or cascade. 
+        // Prisma relies on manual cascade if not defined in schema with onDelete: Cascade. 
+        // Let's assume we want to delete exams in it too? 
+        // Getting complex. Let's strict: Only if empty or move exams to root (null).
+        // For simplicity requested: "Group exams".
+        // Let's just delete the folder and exams become orphans or we cascade delete.
+        // Update schema to SetNull? or just delete folder and keep exams with invalid ID? No.
+        // Let's manually set folder_id to null for exams in this folder.
+        await prisma.exam.updateMany({
+            where: { folder_id: id },
+            data: { folder_id: null }
+        })
+        await prisma.examFolder.delete({ where: { id } })
+
+        revalidatePath('/dashboard/exams')
+        return { success: true }
+    } catch (e) {
+        return { success: false, error: "Failed to delete folder" }
+    }
+}
+
+export async function getExamFolders() {
+    return await prisma.examFolder.findMany({ orderBy: { created_at: 'desc' }, include: { _count: { select: { exams: true } } } })
+}
+
+export async function getExams(folderId?: string | null) {
     const session = await auth()
     try {
         // If Resident, filter by course enrollment
         const whereClause: any = {}
+
+        // Folder filtering
+        if (folderId !== undefined) {
+            whereClause.folder_id = folderId
+        } else {
+            // If undefined (root view called without folder), maybe we want ALL or just Root? 
+            // Usually UI handles "Root" by passing null. 
+            // If we pass 'undefined', we might want *all* exams (for legacy view).
+            // But for folders view, we likely want flat list if no folder structure used, or just root exams.
+            // Let's support optional filter. If not passed, return all (backward compat).
+        }
+        // Actually, if we want "Folders View", `getExams` should probably return exams in the current folder (or root if null).
 
         if (session?.user?.role === 'RESIDENTE') {
             // 1. Get user enrollments
@@ -102,6 +161,7 @@ export async function createExam(data: any) {
                 // If course_id is "general" or empty, store null or handle logic. 
                 // For now, if provided use it, else null.
                 course_id: data.course_id === 'general' ? null : data.course_id,
+                folder_id: data.folder_id === 'root' ? null : data.folder_id,
                 created_by: session.user.id,
                 duration_minutes: parseInt(data.duration_minutes),
                 start_window: data.start_window,

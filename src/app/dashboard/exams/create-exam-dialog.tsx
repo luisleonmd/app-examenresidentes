@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { createExam, getCourses } from "@/app/lib/exams"
+import { createExam, getCourses, getExamFolders } from "@/app/lib/exams"
 import { getCategories } from "@/app/lib/questions" // Reuse this action
 import { Button } from "@/components/ui/button"
 import { DateTimePicker } from "@/components/ui/date-time-picker"
@@ -41,11 +41,12 @@ import { Plus } from "lucide-react"
 const formSchema = z.object({
     title: z.string().min(5, "El título debe tener al menos 5 caracteres"),
     assigned_to_user_id: z.string().optional(),
+    folder_id: z.string().optional(),
     categories: z.array(z.string()).min(1, "Seleccione al menos una categoría"),
     duration_minutes: z.string().refine(val => !isNaN(Number(val)) && Number(val) > 0, "Debe ser un número mayor a 0"),
     total_questions: z.string().refine(val => !isNaN(Number(val)) && Number(val) > 0, "Debe ser mayor a 0"),
-    start_window: z.date({ required_error: "Fecha requerida" }),
-    end_window: z.date({ required_error: "Fecha requerida" }),
+    start_window: z.date(),
+    end_window: z.date(),
     claims_start: z.date().optional(),
     claims_end: z.date().optional(),
 }).refine(data => data.end_window > data.start_window, {
@@ -57,6 +58,7 @@ export function CreateExamDialog() {
     const [open, setOpen] = useState(false)
     const [residents, setResidents] = useState<any[]>([])
     const [categories, setCategories] = useState<any[]>([])
+    const [folders, setFolders] = useState<any[]>([])
     const [categorySearch, setCategorySearch] = useState("")
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -64,6 +66,7 @@ export function CreateExamDialog() {
         defaultValues: {
             title: "",
             assigned_to_user_id: "all",
+            folder_id: "root",
             categories: [],
             duration_minutes: "60",
             total_questions: "20",
@@ -76,6 +79,7 @@ export function CreateExamDialog() {
         // Fetch residents instead of courses
         fetch('/api/residents').then(r => r.json()).then(setResidents).catch(() => { })
         getCategories().then(setCategories)
+        getExamFolders().then(setFolders).catch(() => { })
     }, [])
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -131,6 +135,32 @@ export function CreateExamDialog() {
                         <div className="grid grid-cols-2 gap-4">
                             <FormField
                                 control={form.control}
+                                name="folder_id"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Carpeta / Periodo</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Carpeta Raíz" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                <SelectItem value="root">Carpeta Raíz (Sin Carpeta)</SelectItem>
+                                                {folders.map(folder => (
+                                                    <SelectItem key={folder.id} value={folder.id}>
+                                                        {folder.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
                                 name="assigned_to_user_id"
                                 render={({ field }) => (
                                     <FormItem>
@@ -154,96 +184,131 @@ export function CreateExamDialog() {
                                     </FormItem>
                                 )}
                             />
+                        </div>
 
-                            <div className="space-y-2">
-                                <Label>Categorías de Preguntas</Label>
-                                <Input
-                                    placeholder="Buscar categoría..."
-                                    value={categorySearch}
-                                    onChange={(e) => setCategorySearch(e.target.value)}
-                                    className="mb-2"
-                                />
-                                <ScrollArea className="h-[120px] w-full border rounded-md p-2">
-                                    {categories
-                                        .filter(cat => cat.name.toLowerCase().includes(categorySearch.toLowerCase()))
-                                        .map((cat) => (
-                                            <FormField
-                                                key={cat.id}
-                                                control={form.control}
-                                                name="categories"
-                                                render={({ field }) => {
-                                                    return (
-                                                        <FormItem
-                                                            key={cat.id}
-                                                            className="flex flex-row items-start space-x-3 space-y-0 py-1"
-                                                        >
-                                                            <FormControl>
-                                                                <Checkbox
-                                                                    checked={field.value?.includes(cat.id)}
-                                                                    onCheckedChange={(checked) => {
-                                                                        return checked
-                                                                            ? field.onChange([...field.value, cat.id])
-                                                                            : field.onChange(
-                                                                                field.value?.filter(
-                                                                                    (value) => value !== cat.id
-                                                                                )
+                        <div className="space-y-2">
+                            <Label>Categorías de Preguntas</Label>
+                            <Input
+                                placeholder="Buscar categoría..."
+                                value={categorySearch}
+                                onChange={(e) => setCategorySearch(e.target.value)}
+                                className="mb-2"
+                            />
+                            <ScrollArea className="h-[120px] w-full border rounded-md p-2">
+                                {categories
+                                    .filter(cat => cat.name.toLowerCase().includes(categorySearch.toLowerCase()))
+                                    .map((cat) => (
+                                        <FormField
+                                            key={cat.id}
+                                            control={form.control}
+                                            name="categories"
+                                            render={({ field }) => {
+                                                return (
+                                                    <FormItem
+                                                        key={cat.id}
+                                                        className="flex flex-row items-start space-x-3 space-y-0 py-1"
+                                                    >
+                                                        <FormControl>
+                                                            <Checkbox
+                                                                checked={field.value?.includes(cat.id)}
+                                                                onCheckedChange={(checked) => {
+                                                                    return checked
+                                                                        ? field.onChange([...field.value, cat.id])
+                                                                        : field.onChange(
+                                                                            field.value?.filter(
+                                                                                (value) => value !== cat.id
                                                                             )
-                                                                    }}
-                                                                />
-                                                            </FormControl>
-                                                            <FormLabel className="font-normal cursor-pointer">
-                                                                {cat.name}
-                                                            </FormLabel>
-                                                        </FormItem>
-                                                    )
-                                                }}
-                                            />
-                                        ))}
-                                </ScrollArea>
-                                {form.formState.errors.categories && (
-                                    <p className="text-sm font-medium text-destructive">
-                                        {form.formState.errors.categories.message}
-                                    </p>
-                                )}
-                            </div>
+                                                                        )
+                                                                }}
+                                                            />
+                                                        </FormControl>
+                                                        <FormLabel className="font-normal cursor-pointer">
+                                                            {cat.name}
+                                                        </FormLabel>
+                                                    </FormItem>
+                                                )
+                                            }}
+                                        />
+                                    ))}
+                            </ScrollArea>
+                            {form.formState.errors.categories && (
+                                <p className="text-sm font-medium text-destructive">
+                                    {form.formState.errors.categories.message}
+                                </p>
+                            )}
                         </div>
+                    </div>
 
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                            control={form.control}
+                            name="duration_minutes"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Duración (min)</FormLabel>
+                                    <FormControl>
+                                        <Input type="number" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="total_questions"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Cant. Preguntas</FormLabel>
+                                    <FormControl>
+                                        <Input type="number" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                            control={form.control}
+                            name="start_window"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                    <FormLabel>Inicio (Fecha y Hora)</FormLabel>
+                                    <DateTimePicker
+                                        date={field.value}
+                                        setDate={field.onChange}
+                                    />
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="end_window"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                    <FormLabel>Fin (Fecha y Hora)</FormLabel>
+                                    <DateTimePicker
+                                        date={field.value}
+                                        setDate={field.onChange}
+                                    />
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+
+                    <div className="border-t pt-4">
+                        <h4 className="text-sm font-medium mb-4">Periodo de Reclamos (Opcional)</h4>
                         <div className="grid grid-cols-2 gap-4">
                             <FormField
                                 control={form.control}
-                                name="duration_minutes"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Duración (min)</FormLabel>
-                                        <FormControl>
-                                            <Input type="number" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="total_questions"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Cant. Preguntas</FormLabel>
-                                        <FormControl>
-                                            <Input type="number" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="start_window"
+                                name="claims_start"
                                 render={({ field }) => (
                                     <FormItem className="flex flex-col">
-                                        <FormLabel>Inicio (Fecha y Hora)</FormLabel>
+                                        <FormLabel>Inicio Reclamos</FormLabel>
                                         <DateTimePicker
                                             date={field.value}
                                             setDate={field.onChange}
@@ -255,10 +320,10 @@ export function CreateExamDialog() {
 
                             <FormField
                                 control={form.control}
-                                name="end_window"
+                                name="claims_end"
                                 render={({ field }) => (
                                     <FormItem className="flex flex-col">
-                                        <FormLabel>Fin (Fecha y Hora)</FormLabel>
+                                        <FormLabel>Fin Reclamos</FormLabel>
                                         <DateTimePicker
                                             date={field.value}
                                             setDate={field.onChange}
@@ -268,48 +333,14 @@ export function CreateExamDialog() {
                                 )}
                             />
                         </div>
+                    </div>
 
-                        <div className="border-t pt-4">
-                            <h4 className="text-sm font-medium mb-4">Periodo de Reclamos (Opcional)</h4>
-                            <div className="grid grid-cols-2 gap-4">
-                                <FormField
-                                    control={form.control}
-                                    name="claims_start"
-                                    render={({ field }) => (
-                                        <FormItem className="flex flex-col">
-                                            <FormLabel>Inicio Reclamos</FormLabel>
-                                            <DateTimePicker
-                                                date={field.value}
-                                                setDate={field.onChange}
-                                            />
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name="claims_end"
-                                    render={({ field }) => (
-                                        <FormItem className="flex flex-col">
-                                            <FormLabel>Fin Reclamos</FormLabel>
-                                            <DateTimePicker
-                                                date={field.value}
-                                                setDate={field.onChange}
-                                            />
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
-                        </div>
-
-                        <DialogFooter>
-                            <Button type="submit">Programar Examen</Button>
-                        </DialogFooter>
-                    </form>
-                </Form>
-            </DialogContent>
-        </Dialog>
+                    <DialogFooter>
+                        <Button type="submit">Programar Examen</Button>
+                    </DialogFooter>
+                </form>
+            </Form>
+        </DialogContent>
+        </Dialog >
     )
 }
