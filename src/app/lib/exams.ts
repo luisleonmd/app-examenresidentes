@@ -365,6 +365,51 @@ export async function createExam(data: any) {
         return { success: false, error: "Failed to create exam" }
     }
 }
+
+export async function updateExam(examId: string, data: any) {
+    const session = await auth()
+    if (!session?.user || session.user.role !== 'COORDINADOR') {
+        return { success: false, error: "Unauthorized" }
+    }
+
+    try {
+        // Calculate duration if dates are modified
+        const durationMs = new Date(data.end_window).getTime() - new Date(data.start_window).getTime()
+        const durationMinutes = Math.floor(durationMs / 60000)
+
+        // Construct Title if generic
+        // Actually, we usually want to keep the title or allow user to edit it. 
+        // In the form, we will pass the "title" or "exam_type" logic.
+        // Let's assume data.title is passed if we want to override, otherwise we re-construct?
+        // Let's just update what is passed.
+
+        // For simple fields:
+        const updateData: any = {
+            duration_minutes: durationMinutes,
+            start_window: data.start_window,
+            end_window: data.end_window,
+            claims_start: data.claims_start,
+            claims_end: data.claims_end,
+            total_questions: parseInt(data.total_questions),
+            categories: JSON.stringify(data.categories),
+        }
+
+        if (data.title) updateData.title = data.title;
+        if (data.folder_id !== undefined) updateData.folder_id = data.folder_id === 'root' ? null : data.folder_id;
+        if (data.course_id !== undefined) updateData.course_id = data.course_id === 'general' ? null : data.course_id;
+
+        await prisma.exam.update({
+            where: { id: examId },
+            data: updateData
+        })
+
+        revalidatePath('/dashboard/exams')
+        return { success: true }
+    } catch (error) {
+        console.error("Failed to update exam", error)
+        return { success: false, error: "Failed to update exam" }
+    }
+}
 export async function deleteExam(examId: string) {
     const session = await auth()
     if (!session?.user || session.user.role !== 'COORDINADOR') {

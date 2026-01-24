@@ -19,6 +19,7 @@ import { Folder, ArrowLeft, Trash2, FolderPlus } from "lucide-react"
 import { CreateFolderDialog } from "./create-folder-dialog"
 import { FolderActions } from "./folder-actions"
 import { ExamVisibilityToggle } from "./exam-visibility-toggle"
+import { EditExamDialog } from "./edit-exam-dialog"
 import { cn } from "@/lib/utils"
 
 export const dynamic = 'force-dynamic'
