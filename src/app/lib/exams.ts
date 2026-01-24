@@ -284,6 +284,31 @@ export async function getExams(folderId?: string | null) {
     }
 }
 
+export async function toggleExamVisibility(examId: string) {
+    const session = await auth()
+    const isCoordinator = session?.user?.role === 'COORDINADOR';
+    const hasPermission = session?.user?.permissions?.includes('MANAGE_EXAMS');
+
+    if (!session?.user || (!isCoordinator && !hasPermission)) {
+        return { success: false, error: "Unauthorized" }
+    }
+
+    try {
+        const exam = await prisma.exam.findUnique({ where: { id: examId } })
+        if (!exam) return { success: false, error: "Exam not found" }
+
+        await prisma.exam.update({
+            where: { id: examId },
+            data: { visible: !exam.visible }
+        })
+
+        revalidatePath('/dashboard/exams')
+        return { success: true }
+    } catch (e) {
+        return { success: false, error: "Failed to toggle visibility" }
+    }
+}
+
 export async function createExam(data: any) {
     const session = await auth()
     const isCoordinator = session?.user?.role === 'COORDINADOR';

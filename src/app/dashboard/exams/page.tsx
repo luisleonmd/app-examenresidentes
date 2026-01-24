@@ -18,6 +18,8 @@ import { DeleteExamButton } from "./delete-exam-button"
 import { Folder, ArrowLeft, Trash2, FolderPlus } from "lucide-react"
 import { CreateFolderDialog } from "./create-folder-dialog"
 import { FolderActions } from "./folder-actions"
+import { ExamVisibilityToggle } from "./exam-visibility-toggle"
+import { cn } from "@/lib/utils"
 
 export const dynamic = 'force-dynamic'
 
@@ -163,9 +165,14 @@ export default async function ExamsPage(props: Props) {
                                                 />
                                             ) : (
                                                 <div className="flex gap-2 justify-end">
-                                                    <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold hover:bg-secondary/80">
-                                                        Programado
+                                                    <span className={cn(
+                                                        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold",
+                                                        exam.visible ? "bg-green-50 text-green-700 border-green-200" : "bg-gray-100 text-gray-500 border-gray-200"
+                                                    )}>
+                                                        {exam.visible ? "Visible" : "Oculto"}
                                                     </span>
+                                                    <ExamVisibilityToggle examId={exam.id} isVisible={exam.visible !== false} />
+
                                                     {/* Link to results for professors */}
                                                     <Button asChild size="sm" variant="outline">
                                                         <a href={`/dashboard/exams/${exam.id}/results`}>Resultados</a>

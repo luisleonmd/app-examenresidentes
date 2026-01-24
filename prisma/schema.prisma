@@ -101,6 +101,7 @@ model Exam {
 
   attempts ExamAttempt[]
   profiles ExamProfile[]
+  visible  Boolean      @default(true) // Helper to hide/show exams manually
 }
 
 model ExamAttempt {
