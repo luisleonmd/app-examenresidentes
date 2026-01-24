@@ -179,11 +179,14 @@ export default async function ExamsPage(props: Props) {
                                                         <a href={`/dashboard/exams/${exam.id}/results`}>Resultados</a>
                                                     </Button>
                                                     {session?.user?.role === 'COORDINADOR' && (
-                                                        <DeleteExamButton
-                                                            examId={exam.id}
-                                                            examTitle={exam.title}
-                                                            duplicateCount={count}
-                                                        />
+                                                        <>
+                                                            <EditExamDialog exam={exam} />
+                                                            <DeleteExamButton
+                                                                examId={exam.id}
+                                                                examTitle={exam.title}
+                                                                duplicateCount={count}
+                                                            />
+                                                        </>
                                                     )}
                                                 </div>
                                             )}
