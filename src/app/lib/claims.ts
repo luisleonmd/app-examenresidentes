@@ -195,8 +195,39 @@ export async function updateClaimStatus(claimId: string, status: string, notes: 
             }
         })
 
+        if (status === 'APPROVED') {
+            // 1. Mark answer as correct
+            await prisma.answer.updateMany({
+                where: {
+                    attempt_id: claim.attempt_id,
+                    question_id: claim.question_id
+                },
+                data: { is_correct: true }
+            })
+
+            // 2. Recalculate Score
+            const totalQuestions = claim.attempt.exam.total_questions
+            if (totalQuestions > 0) {
+                const correctCount = await prisma.answer.count({
+                    where: {
+                        attempt_id: claim.attempt_id,
+                        is_correct: true
+                    }
+                })
+
+                // Calculate new score (scale of 100)
+                // Use Math.round to keep 2 decimals or integer? Let's use 2 decimals max.
+                const newScore = Math.round((correctCount / totalQuestions) * 100 * 100) / 100
+
+                await prisma.examAttempt.update({
+                    where: { id: claim.attempt_id },
+                    data: { score: newScore }
+                })
+            }
+        }
+
         // Create notification for student
-        const statusText = status === 'APPROVED' ? 'aprobado' : 'rechazado'
+        const statusText = status === 'APPROVED' ? 'aprobado y nota actualizada' : 'rechazado'
         await createNotification(
             claim.attempt.user_id,
             'CLAIM_RESOLVED',
