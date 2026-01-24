@@ -176,7 +176,7 @@ export async function updateClaimStatus(claimId: string, status: string, notes: 
                 attempt: {
                     include: {
                         user: true,
-                        exam: { select: { title: true } }
+                        exam: { select: { title: true, total_questions: true } }
                     }
                 }
             }
