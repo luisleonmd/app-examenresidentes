@@ -6,9 +6,12 @@ import { revalidatePath } from "next/cache"
 
 const prisma = new PrismaClient()
 
-export async function getUsers() {
+export async function getUsers(role?: string) {
     try {
+        const where = role && role !== 'ALL' ? { role: role as any } : {}
+
         const users = await prisma.user.findMany({
+            where,
             orderBy: { created_at: 'desc' },
             select: {
                 id: true,
