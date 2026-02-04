@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import * as xlsx from 'xlsx';
 import mammoth from 'mammoth';
-const pdfWithAny = require('pdf-parse');
+// Lazy load pdf-parse only when needed
 import { revalidatePath } from 'next/cache';
 
 const prisma = new PrismaClient();
@@ -143,6 +143,9 @@ async function parseWord(buffer: Buffer): Promise<ImportedUser[]> {
 
 async function parsePDF(buffer: Buffer): Promise<ImportedUser[]> {
     // pdf-parse library
+    // Lazy load to avoid top-level require issues
+    const pdfWithAny = require('pdf-parse');
+
     // Need to cast to any because pdf-parse types might be tricky in strict mode or different version
     const data = await pdfWithAny(buffer);
     return parseTextContent(data.text);

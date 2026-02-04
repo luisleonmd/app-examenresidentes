@@ -41,14 +41,22 @@ export function ImportUsersDialog() {
         setIsPending(true);
         setResult(null);
 
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('cohort', cohort);
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('cohort', cohort);
 
-        const response = await importUsersFromFile(formData);
-
-        setResult(response);
-        setIsPending(false);
+            const response = await importUsersFromFile(formData);
+            setResult(response);
+        } catch (error) {
+            console.error('Frontend Import Error:', error);
+            setResult({
+                success: false,
+                message: 'Ocurrió un error inesperado al comunicarse con el servidor. Intente nuevamente.'
+            });
+        } finally {
+            setIsPending(false);
+        }
     };
 
     return (
