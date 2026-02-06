@@ -92,3 +92,39 @@ export async function deleteUser(userId: string) {
         return { success: false, error: "Error al eliminar usuario. Puede que tenga datos relacionados." }
     }
 }
+
+export async function updateUser(userId: string, data: any) {
+    const { auth } = await import("@/auth")
+    const session = await auth()
+
+    // Only coordinators can update users
+    if (!session?.user || session.user.role !== 'COORDINADOR') {
+        return { success: false, error: "No autorizado" }
+    }
+
+    try {
+        const updateData: any = {
+            nombre: data.nombre,
+            email: data.email || null,
+            role: data.role,
+            cohort: data.role === 'RESIDENTE' ? data.cohort : null,
+        }
+
+        // Only update password if provided
+        if (data.password && data.password.trim() !== '') {
+            const hashedPassword = await bcrypt.hash(data.password, 10)
+            updateData.password_hash = hashedPassword
+        }
+
+        await prisma.user.update({
+            where: { id: userId },
+            data: updateData
+        })
+
+        revalidatePath('/dashboard/users')
+        return { success: true }
+    } catch (error) {
+        console.error("Failed to update user:", error)
+        return { success: false, error: "Error al actualizar usuario." }
+    }
+}

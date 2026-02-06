@@ -1,6 +1,7 @@
 import { getUsers } from "@/app/lib/users"
 import { CreateUserDialog } from "./create-user-dialog"
 import { ImportUsersDialog } from "./import-users-dialog"
+import { EditUserDialog } from "./edit-user-dialog"
 import {
     Table,
     TableBody,
@@ -84,11 +85,14 @@ export default async function UsersPage(props: { searchParams: Promise<{ role?: 
                                     <TableCell>{user.cohort || "-"}</TableCell>
                                     <TableCell>{user.created_at.toLocaleDateString('es-CR')}</TableCell>
                                     <TableCell className="text-right">
-                                        <DeleteUserButton
-                                            userId={user.id}
-                                            userName={user.nombre}
-                                            userRole={user.role}
-                                        />
+                                        <div className="flex justify-end gap-2">
+                                            <EditUserDialog user={user} />
+                                            <DeleteUserButton
+                                                userId={user.id}
+                                                userName={user.nombre}
+                                                userRole={user.role}
+                                            />
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             ))

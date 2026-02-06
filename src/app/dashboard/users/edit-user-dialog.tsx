@@ -1,0 +1,201 @@
+"use client"
+
+import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
+import { updateUser } from "@/app/lib/users"
+import { Button } from "@/components/ui/button"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+    DialogFooter,
+} from "@/components/ui/dialog"
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+import { Pencil } from "lucide-react"
+
+const formSchema = z.object({
+    nombre: z.string().min(3, "El nombre es requerido"),
+    email: z.string().email("Correo electrónico inválido").optional().or(z.literal('')),
+    role: z.enum(["COORDINADOR", "PROFESOR", "RESIDENTE"]),
+    cohort: z.string().optional(),
+    password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres").optional().or(z.literal('')),
+})
+
+interface EditUserDialogProps {
+    user: {
+        id: string
+        cedula: string
+        nombre: string
+        email: string | null
+        role: "COORDINADOR" | "PROFESOR" | "RESIDENTE" | string
+        cohort: string | null
+    }
+}
+
+export function EditUserDialog({ user }: EditUserDialogProps) {
+    const [open, setOpen] = useState(false)
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            nombre: user.nombre,
+            email: user.email || "",
+            role: user.role as any,
+            cohort: user.cohort || "R1",
+            password: "",
+        },
+    })
+
+    const role = form.watch("role")
+
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        const result = await updateUser(user.id, values)
+        if (result.success) {
+            setOpen(false)
+            form.reset({ password: "" }) // Keep other values, plain reset password
+        } else {
+            alert(result.error)
+        }
+    }
+
+    return (
+        <Dialog open={open} onOpenChange={(v) => {
+            setOpen(v)
+            if (v) form.reset({
+                nombre: user.nombre,
+                email: user.email || "",
+                role: user.role as any,
+                cohort: user.cohort || "R1",
+                password: "",
+            })
+        }}>
+            <DialogTrigger asChild>
+                <Button variant="ghost" size="icon">
+                    <Pencil className="size-4" />
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Editar Usuario</DialogTitle>
+                    <DialogDescription>
+                        Modifique los datos del usuario {user.cedula}.
+                        <br />
+                        <span className="text-xs text-muted-foreground">Deje la contraseña en blanco para mantener la actual.</span>
+                    </DialogDescription>
+                </DialogHeader>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <FormField
+                            control={form.control}
+                            name="nombre"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Nombre Completo</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Juan Pérez" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="email"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Correo Electrónico</FormLabel>
+                                    <FormControl>
+                                        <Input type="email" placeholder="usuario@ejemplo.com" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="role"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Rol</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Seleccione un rol" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="RESIDENTE">Residente</SelectItem>
+                                            <SelectItem value="PROFESOR">Profesor</SelectItem>
+                                            <SelectItem value="COORDINADOR">Coordinador</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        {role === "RESIDENTE" && (
+                            <FormField
+                                control={form.control}
+                                name="cohort"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Cohorte</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Seleccione cohorte" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                <SelectItem value="R1">R1</SelectItem>
+                                                <SelectItem value="R2">R2</SelectItem>
+                                                <SelectItem value="R3">R3</SelectItem>
+                                                <SelectItem value="R4">R4</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        )}
+                        <FormField
+                            control={form.control}
+                            name="password"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Nueva Contraseña (Opcional)</FormLabel>
+                                    <FormControl>
+                                        <Input type="password" placeholder="Dejar en blanco para no cambiar" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <DialogFooter>
+                            <Button type="submit">Actualizar</Button>
+                        </DialogFooter>
+                    </form>
+                </Form>
+            </DialogContent>
+        </Dialog>
+    )
+}
