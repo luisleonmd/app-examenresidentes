@@ -4,63 +4,59 @@
 
 @layer base {
     :root {
-        /* Deep space blue background */
-        --background: 220 50% 8%; 
-        --foreground: 210 40% 98%;
-        /* Dark transparent cards */
-        --card: 220 40% 12%;
-        --card-foreground: 210 40% 98%;
-        --popover: 220 40% 12%;
-        --popover-foreground: 210 40% 98%;
-        /* Neon Cyan / Green primary */
-        --primary: 158 100% 50%;
-        --primary-foreground: 220 50% 8%;
-        /* Secondary elements */
-        --secondary: 220 30% 20%;
-        --secondary-foreground: 210 40% 98%;
-        --muted: 220 30% 20%;
-        --muted-foreground: 215 20.2% 65.1%;
-        --accent: 158 100% 50%;
-        --accent-foreground: 220 50% 8%;
-        --destructive: 0 62.8% 30.6%;
+        /* Professional deep navy */
+        --background: 218 35% 14%;
+        --foreground: 210 40% 95%;
+        --card: 218 32% 18%;
+        --card-foreground: 210 40% 95%;
+        --popover: 218 32% 18%;
+        --popover-foreground: 210 40% 95%;
+        /* Professional teal/blue primary */
+        --primary: 199 89% 48%;
+        --primary-foreground: 218 35% 10%;
+        --secondary: 218 25% 24%;
+        --secondary-foreground: 210 40% 90%;
+        --muted: 218 25% 22%;
+        --muted-foreground: 215 20% 60%;
+        --accent: 199 89% 48%;
+        --accent-foreground: 218 35% 10%;
+        --destructive: 0 72% 51%;
         --destructive-foreground: 210 40% 98%;
-        /* Borders are subtle blue/cyan */
-        --border: 220 30% 25%;
-        --input: 220 30% 25%;
-        --ring: 158 100% 50%;
+        --border: 218 25% 26%;
+        --input: 218 25% 22%;
+        --ring: 199 89% 48%;
         --radius: 0.5rem;
-        /* Sidebar matches background but slightly lighter */
-        --sidebar-background: 220 45% 10%;
-        --sidebar-foreground: 210 40% 98%;
-        --sidebar-primary: 158 100% 50%;
-        --sidebar-primary-foreground: 220 50% 8%;
-        --sidebar-accent: 220 30% 20%;
-        --sidebar-accent-foreground: 210 40% 98%;
-        --sidebar-border: 220 30% 25%;
-        --sidebar-ring: 158 100% 50%;
+        /* Sidebar - slightly darker than background */
+        --sidebar-background: 218 38% 11%;
+        --sidebar-foreground: 210 40% 90%;
+        --sidebar-primary: 199 89% 48%;
+        --sidebar-primary-foreground: 218 35% 10%;
+        --sidebar-accent: 218 28% 18%;
+        --sidebar-accent-foreground: 210 40% 95%;
+        --sidebar-border: 218 28% 20%;
+        --sidebar-ring: 199 89% 48%;
     }
 
     .dark {
-        /* Enforce same theme for dark class just in case */
-        --background: 220 50% 8%; 
-        --foreground: 210 40% 98%;
-        --card: 220 40% 12%;
-        --card-foreground: 210 40% 98%;
-        --popover: 220 40% 12%;
-        --popover-foreground: 210 40% 98%;
-        --primary: 158 100% 50%;
-        --primary-foreground: 220 50% 8%;
-        --secondary: 220 30% 20%;
-        --secondary-foreground: 210 40% 98%;
-        --muted: 220 30% 20%;
-        --muted-foreground: 215 20.2% 65.1%;
-        --accent: 158 100% 50%;
-        --accent-foreground: 220 50% 8%;
-        --destructive: 0 62.8% 30.6%;
+        --background: 218 35% 14%;
+        --foreground: 210 40% 95%;
+        --card: 218 32% 18%;
+        --card-foreground: 210 40% 95%;
+        --popover: 218 32% 18%;
+        --popover-foreground: 210 40% 95%;
+        --primary: 199 89% 48%;
+        --primary-foreground: 218 35% 10%;
+        --secondary: 218 25% 24%;
+        --secondary-foreground: 210 40% 90%;
+        --muted: 218 25% 22%;
+        --muted-foreground: 215 20% 60%;
+        --accent: 199 89% 48%;
+        --accent-foreground: 218 35% 10%;
+        --destructive: 0 72% 51%;
         --destructive-foreground: 210 40% 98%;
-        --border: 220 30% 25%;
-        --input: 220 30% 25%;
-        --ring: 158 100% 50%;
+        --border: 218 25% 26%;
+        --input: 218 25% 22%;
+        --ring: 199 89% 48%;
     }
 }
 
@@ -71,36 +67,43 @@
 
     body {
         @apply bg-background text-foreground;
-        background-color: #010a17; /* Fallback hardcoded deep blue */
     }
 }
 
 @layer utilities {
     .glass-panel {
-        background: rgba(4, 20, 45, 0.6);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(0, 255, 170, 0.2);
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        background: rgba(15, 30, 55, 0.7);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(14, 165, 233, 0.18);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25);
     }
-    
+
+    .accent-border {
+        border: 1px solid rgba(14, 165, 233, 0.35);
+        box-shadow: 0 0 0 0 transparent;
+    }
+
+    .accent-border:focus-within {
+        border-color: rgba(14, 165, 233, 0.7);
+        box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.15);
+    }
+
     .neon-border {
-        border: 1px solid #00ffaa;
-        box-shadow: 0 0 8px rgba(0, 255, 170, 0.5), inset 0 0 8px rgba(0, 255, 170, 0.2);
+        border: 1px solid rgba(14, 165, 233, 0.5);
+        box-shadow: 0 0 12px rgba(14, 165, 233, 0.15);
     }
 
     .neon-text {
-        color: #00ffaa;
-        text-shadow: 0 0 5px rgba(0, 255, 170, 0.5);
+        color: #38bdf8;
     }
 
     .neon-border-blue {
-        border: 1px solid #00c3ff;
-        box-shadow: 0 0 8px rgba(0, 195, 255, 0.5), inset 0 0 8px rgba(0, 195, 255, 0.2);
+        border: 1px solid rgba(14, 165, 233, 0.4);
+        box-shadow: 0 0 8px rgba(14, 165, 233, 0.1);
     }
 
     .neon-text-blue {
-        color: #00c3ff;
-        text-shadow: 0 0 5px rgba(0, 195, 255, 0.5);
+        color: #38bdf8;
     }
 }

@@ -78,11 +78,11 @@ export default function ExamRunnerPage() {
 
     if (loading) return (
         <div className="flex flex-col items-center justify-center min-h-screen gap-4"
-            style={{ background: 'radial-gradient(ellipse at center, #011a33 0%, #010a17 100%)' }}>
-            <div className="neon-border-blue rounded-full p-6">
-                <Loader2 className="size-10 animate-spin text-cyan-400" />
+            style={{ background: 'linear-gradient(135deg, #0d1f35 0%, #112240 100%)' }}>
+            <div className="rounded-full p-6 border border-sky-500/30 bg-sky-500/5">
+                <Loader2 className="size-10 animate-spin text-sky-400" />
             </div>
-            <p className="text-cyan-300 tracking-widest uppercase text-sm animate-pulse">Cargando examen...</p>
+            <p className="text-sky-300/70 tracking-widest uppercase text-sm">Cargando examen...</p>
         </div>
     )
 
@@ -91,7 +91,8 @@ export default function ExamRunnerPage() {
     const currentQ = examData.questions[currentQuestionIndex]
 
     if (!currentQ) return (
-        <div className="flex flex-col items-center justify-center min-h-screen gap-4 text-center">
+        <div className="flex flex-col items-center justify-center min-h-screen gap-4 text-center"
+            style={{ background: 'linear-gradient(135deg, #0d1f35 0%, #112240 100%)' }}>
             <AlertCircle className="size-12 text-red-400" />
             <p className="text-white">No se encontraron preguntas en este examen.</p>
             <Button variant="outline" onClick={() => router.push('/dashboard/exams')}>
@@ -106,12 +107,12 @@ export default function ExamRunnerPage() {
 
     return (
         <div className="min-h-screen flex flex-col"
-            style={{ background: 'radial-gradient(ellipse at top, #011a33 0%, #010a17 100%)' }}>
-            {/* Top bar with timer */}
-            <div className="flex items-center justify-between px-6 py-3 border-b border-cyan-900/40"
-                style={{ background: 'rgba(1, 26, 51, 0.8)', backdropFilter: 'blur(8px)' }}>
+            style={{ background: 'linear-gradient(180deg, #0d1f35 0%, #0f2847 100%)' }}>
+            {/* Top bar */}
+            <div className="flex items-center justify-between px-6 py-3 border-b border-slate-700/50"
+                style={{ background: 'rgba(10, 22, 42, 0.85)', backdropFilter: 'blur(8px)' }}>
                 <div>
-                    <span className="text-xs text-cyan-400/60 uppercase tracking-widest">UCR | SEP</span>
+                    <span className="text-xs text-sky-400/50 uppercase tracking-widest">UCR | SEP</span>
                     <h2 className="text-white font-semibold text-sm truncate max-w-xs">{examData.examTitle}</h2>
                 </div>
                 {/* Digital timer */}
@@ -119,27 +120,26 @@ export default function ExamRunnerPage() {
                     <div
                         className="font-mono text-3xl font-black tracking-widest px-4 py-1 rounded-lg"
                         style={{
-                            color: timeIsLow ? '#ff4444' : '#00c3ff',
-                            textShadow: timeIsLow ? '0 0 12px rgba(255,68,68,0.8)' : '0 0 12px rgba(0,195,255,0.8)',
-                            border: `1px solid ${timeIsLow ? 'rgba(255,68,68,0.4)' : 'rgba(0,195,255,0.3)'}`,
-                            background: timeIsLow ? 'rgba(255,68,68,0.05)' : 'rgba(0,195,255,0.05)',
+                            color: timeIsLow ? '#f87171' : '#38bdf8',
+                            background: timeIsLow ? 'rgba(248,113,113,0.08)' : 'rgba(56,189,248,0.08)',
+                            border: `1px solid ${timeIsLow ? 'rgba(248,113,113,0.3)' : 'rgba(56,189,248,0.25)'}`,
                         }}
                     >
                         {formatTime(timeLeft)}
                     </div>
                 </div>
                 <div className="text-right">
-                    <p className="text-xs text-cyan-400/60 uppercase tracking-widest">Pregunta</p>
+                    <p className="text-xs text-sky-400/50 uppercase tracking-widest">Pregunta</p>
                     <p className="text-white font-bold">{currentQuestionIndex + 1} / {examData.questions.length}</p>
                 </div>
             </div>
 
-            {/* Main 3-column layout */}
+            {/* 3-column layout */}
             <div className="flex flex-1 overflow-hidden">
 
-                {/* Left: Question navigation */}
-                <div className="w-16 md:w-20 border-r border-cyan-900/30 flex flex-col items-center py-4 gap-2 overflow-y-auto"
-                    style={{ background: 'rgba(1, 10, 23, 0.6)' }}>
+                {/* Left: Question nav */}
+                <div className="w-16 md:w-20 border-r border-slate-700/40 flex flex-col items-center py-4 gap-2 overflow-y-auto"
+                    style={{ background: 'rgba(8, 18, 34, 0.5)' }}>
                     {examData.questions.map((q: any, idx: number) => {
                         const isAnswered = !!(answers[q.question_id] || q.selected_option_id)
                         const isCurrent = idx === currentQuestionIndex
@@ -147,20 +147,19 @@ export default function ExamRunnerPage() {
                             <button
                                 key={q.question_id}
                                 onClick={() => setCurrentQuestionIndex(idx)}
-                                className="w-10 h-10 rounded text-xs font-bold transition-all duration-200 relative"
+                                className="w-10 h-10 rounded text-xs font-bold transition-all duration-150"
                                 style={{
                                     background: isCurrent
-                                        ? 'rgba(0, 195, 255, 0.2)'
+                                        ? 'rgba(56, 189, 248, 0.2)'
                                         : isAnswered
-                                            ? 'rgba(0, 255, 170, 0.1)'
-                                            : 'rgba(255,255,255,0.03)',
+                                            ? 'rgba(34, 197, 94, 0.1)'
+                                            : 'rgba(255,255,255,0.04)',
                                     border: isCurrent
-                                        ? '1.5px solid #00c3ff'
+                                        ? '1.5px solid rgba(56,189,248,0.7)'
                                         : isAnswered
-                                            ? '1px solid rgba(0, 255, 170, 0.5)'
-                                            : '1px solid rgba(255,255,255,0.1)',
-                                    color: isCurrent ? '#00c3ff' : isAnswered ? '#00ffaa' : '#ffffff80',
-                                    boxShadow: isCurrent ? '0 0 8px rgba(0,195,255,0.4)' : 'none',
+                                            ? '1px solid rgba(34,197,94,0.4)'
+                                            : '1px solid rgba(255,255,255,0.08)',
+                                    color: isCurrent ? '#38bdf8' : isAnswered ? '#86efac' : '#94a3b8',
                                 }}
                             >
                                 {idx + 1}
@@ -169,32 +168,32 @@ export default function ExamRunnerPage() {
                     })}
                 </div>
 
-                {/* Center: Question content */}
+                {/* Center: Question */}
                 <div className="flex-1 flex flex-col overflow-y-auto p-4 md:p-6">
                     {/* Category badge */}
                     <div className="mb-4">
                         <span className="text-xs font-semibold uppercase tracking-widest px-3 py-1 rounded-full"
                             style={{
-                                border: '1px solid rgba(0, 255, 170, 0.3)',
-                                color: '#00ffaa',
-                                background: 'rgba(0, 255, 170, 0.08)'
+                                border: '1px solid rgba(56, 189, 248, 0.3)',
+                                color: '#7dd3fc',
+                                background: 'rgba(56, 189, 248, 0.08)'
                             }}>
                             {currentQ.categoryName}
                         </span>
                     </div>
 
                     {/* Question text */}
-                    <div className="glass-panel rounded-xl p-5 mb-6">
-                        <p className="text-xs text-cyan-400/60 uppercase tracking-widest mb-2">
+                    <div className="glass-panel rounded-xl p-5 mb-5">
+                        <p className="text-xs text-sky-400/50 uppercase tracking-widest mb-2">
                             Pregunta {currentQuestionIndex + 1} de {examData.questions.length}
                         </p>
                         {currentQ.image_url && (
-                            <div className="mb-4 rounded-lg overflow-hidden border border-cyan-500/20">
+                            <div className="mb-4 rounded-lg overflow-hidden border border-slate-600/40">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img src={currentQ.image_url} alt="Imagen" className="w-full h-auto max-h-60 object-contain" />
                             </div>
                         )}
-                        <p className="text-white text-sm md:text-base leading-relaxed">{currentQ.question_text}</p>
+                        <p className="text-slate-100 text-sm md:text-base leading-relaxed">{currentQ.question_text}</p>
                     </div>
 
                     {/* Options */}
@@ -205,30 +204,30 @@ export default function ExamRunnerPage() {
                                 <button
                                     key={opt.id}
                                     onClick={() => handleOptionSelect(opt.id)}
-                                    className="w-full text-left p-4 rounded-xl flex items-center gap-4 transition-all duration-200"
+                                    className="w-full text-left p-4 rounded-xl flex items-center gap-4 transition-all duration-150"
                                     style={{
                                         background: isSelected
-                                            ? 'rgba(0, 255, 170, 0.1)'
+                                            ? 'rgba(56, 189, 248, 0.1)'
                                             : 'rgba(255, 255, 255, 0.03)',
                                         border: isSelected
-                                            ? '1.5px solid #00ffaa'
-                                            : '1px solid rgba(255, 255, 255, 0.1)',
+                                            ? '1.5px solid rgba(56, 189, 248, 0.55)'
+                                            : '1px solid rgba(255, 255, 255, 0.08)',
                                         boxShadow: isSelected
-                                            ? '0 0 12px rgba(0, 255, 170, 0.2)'
+                                            ? '0 0 16px rgba(56, 189, 248, 0.12)'
                                             : 'none',
                                     }}
                                 >
                                     <span
                                         className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0"
                                         style={{
-                                            background: isSelected ? '#00ffaa' : 'rgba(0, 195, 255, 0.1)',
-                                            color: isSelected ? '#010a17' : '#00c3ff',
-                                            border: isSelected ? 'none' : '1px solid rgba(0, 195, 255, 0.3)',
+                                            background: isSelected ? 'rgba(56,189,248,0.25)' : 'rgba(148,163,184,0.1)',
+                                            color: isSelected ? '#38bdf8' : '#94a3b8',
+                                            border: isSelected ? '1px solid rgba(56,189,248,0.5)' : '1px solid rgba(148,163,184,0.15)',
                                         }}
                                     >
                                         {optionLetters[i] || opt.id}
                                     </span>
-                                    <span className={`text-sm flex-1 leading-snug ${isSelected ? 'text-white font-medium' : 'text-white/80'}`}>
+                                    <span className={`text-sm flex-1 leading-snug ${isSelected ? 'text-sky-100 font-medium' : 'text-slate-300'}`}>
                                         {opt.text}
                                     </span>
                                 </button>
@@ -236,17 +235,16 @@ export default function ExamRunnerPage() {
                         })}
                     </div>
 
-                    {/* Navigation buttons */}
+                    {/* Nav buttons */}
                     <div className="flex justify-between mt-auto">
                         <button
                             onClick={() => setCurrentQuestionIndex(prev => Math.max(0, prev - 1))}
                             disabled={currentQuestionIndex === 0}
-                            className="px-6 py-3 rounded-xl text-sm font-bold uppercase tracking-widest transition-all"
+                            className="px-6 py-2.5 rounded-xl text-sm font-semibold uppercase tracking-wide transition-all disabled:opacity-30"
                             style={{
-                                border: '1.5px solid rgba(0, 195, 255, 0.4)',
-                                color: currentQuestionIndex === 0 ? 'rgba(0,195,255,0.3)' : '#00c3ff',
+                                border: '1px solid rgba(148,163,184,0.25)',
+                                color: '#94a3b8',
                                 background: 'transparent',
-                                cursor: currentQuestionIndex === 0 ? 'not-allowed' : 'pointer',
                             }}
                         >
                             ← Anterior
@@ -256,12 +254,11 @@ export default function ExamRunnerPage() {
                             <button
                                 onClick={handleFinish}
                                 disabled={isSubmitting}
-                                className="px-6 py-3 rounded-xl text-sm font-bold uppercase tracking-widest transition-all flex items-center gap-2"
+                                className="px-6 py-2.5 rounded-xl text-sm font-semibold uppercase tracking-wide transition-all flex items-center gap-2"
                                 style={{
-                                    border: '1.5px solid rgba(255, 68, 68, 0.6)',
-                                    color: '#ff6666',
-                                    background: 'rgba(255,68,68,0.08)',
-                                    boxShadow: '0 0 12px rgba(255,68,68,0.2)',
+                                    border: '1px solid rgba(239,68,68,0.4)',
+                                    color: '#fca5a5',
+                                    background: 'rgba(239,68,68,0.08)',
                                 }}
                             >
                                 {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle className="size-4" />}
@@ -270,12 +267,11 @@ export default function ExamRunnerPage() {
                         ) : (
                             <button
                                 onClick={() => setCurrentQuestionIndex(prev => Math.min(examData.questions.length - 1, prev + 1))}
-                                className="px-6 py-3 rounded-xl text-sm font-bold uppercase tracking-widest transition-all"
+                                className="px-6 py-2.5 rounded-xl text-sm font-semibold uppercase tracking-wide transition-all"
                                 style={{
-                                    border: '1.5px solid #00ffaa',
-                                    color: '#00ffaa',
-                                    background: 'rgba(0, 255, 170, 0.08)',
-                                    boxShadow: '0 0 12px rgba(0,255,170,0.2)',
+                                    border: '1px solid rgba(56,189,248,0.4)',
+                                    color: '#7dd3fc',
+                                    background: 'rgba(56,189,248,0.08)',
                                 }}
                             >
                                 Siguiente →
@@ -284,25 +280,25 @@ export default function ExamRunnerPage() {
                     </div>
                 </div>
 
-                {/* Right: Decorative EKG monitors */}
-                <div className="hidden lg:flex w-48 border-l border-cyan-900/30 flex-col items-center py-6 px-3 gap-6"
-                    style={{ background: 'rgba(1, 10, 23, 0.6)' }}>
+                {/* Right: EKG decorativo */}
+                <div className="hidden lg:flex w-44 border-l border-slate-700/40 flex-col items-center py-6 px-3 gap-5"
+                    style={{ background: 'rgba(8, 18, 34, 0.5)' }}>
                     <div className="w-full">
-                        <p className="text-xs text-cyan-400/40 uppercase tracking-widest mb-2 text-center">ECG</p>
+                        <p className="text-xs text-slate-500 uppercase tracking-widest mb-2 text-center">ECG</p>
                         <div className="rounded-lg overflow-hidden"
-                            style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(0,255,170,0.2)' }}>
-                            <AnimatedEKG className="opacity-90" />
+                            style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(56,189,248,0.15)' }}>
+                            <AnimatedEKG className="opacity-80" />
                         </div>
                     </div>
                     <div className="w-full">
-                        <p className="text-xs text-cyan-400/40 uppercase tracking-widest mb-2 text-center">VITALS</p>
+                        <p className="text-xs text-slate-500 uppercase tracking-widest mb-2 text-center">VITALS</p>
                         <div className="rounded-lg overflow-hidden"
-                            style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(0,195,255,0.2)' }}>
-                            <AnimatedEKG className="opacity-70" />
+                            style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(56,189,248,0.12)' }}>
+                            <AnimatedEKG className="opacity-60" />
                         </div>
                     </div>
                     <div className="mt-auto text-center">
-                        <p className="text-xs text-cyan-400/30 uppercase tracking-widest">UCR | SEP</p>
+                        <p className="text-xs text-slate-600 uppercase tracking-widest">UCR | SEP</p>
                     </div>
                 </div>
 

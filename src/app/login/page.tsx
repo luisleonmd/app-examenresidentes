@@ -5,13 +5,13 @@ import { ConstellationBackground } from '@/components/constellation-background';
 export default function LoginPage() {
     return (
         <div className="relative flex h-screen w-full items-center justify-center overflow-hidden"
-            style={{ background: 'radial-gradient(ellipse at center, #011a33 0%, #010a17 70%)' }}>
+            style={{ background: 'linear-gradient(135deg, #0d1f35 0%, #112240 50%, #0a1929 100%)' }}>
             <ConstellationBackground />
-            {/* Decorative grid lines */}
+            {/* Subtle grid overlay */}
             <div className="absolute inset-0 z-[1] pointer-events-none"
                 style={{
-                    backgroundImage: 'linear-gradient(rgba(0,195,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,195,255,0.04) 1px, transparent 1px)',
-                    backgroundSize: '50px 50px'
+                    backgroundImage: 'linear-gradient(rgba(14,165,233,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(14,165,233,0.03) 1px, transparent 1px)',
+                    backgroundSize: '60px 60px'
                 }}
             />
             <div className="relative z-10 w-full max-w-sm px-4">
