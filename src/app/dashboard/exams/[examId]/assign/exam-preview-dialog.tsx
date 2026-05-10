@@ -13,7 +13,7 @@ import { Eye, Loader2, CheckCircle } from "lucide-react"
 import { generateExamPreview } from "@/app/lib/exam-taking"
 import { Badge } from "@/components/ui/badge"
 
-export function ExamPreviewDialog({ examId, residentId, residentName }: { examId: string, residentId: string, residentName: string }) {
+export function ExamPreviewDialog({ examId, residentId, residentName, iconOnly = false }: { examId: string, residentId?: string, residentName?: string, iconOnly?: boolean }) {
     const [open, setOpen] = useState(false)
     const [loading, setLoading] = useState(false)
     const [questions, setQuestions] = useState<any[]>([])
@@ -40,14 +40,22 @@ export function ExamPreviewDialog({ examId, residentId, residentName }: { examId
     return (
         <Dialog open={open} onOpenChange={handleOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
-                    <Eye className="size-4 mr-2" />
-                    Vista Previa
-                </Button>
+                {iconOnly ? (
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50" title="Vista Previa del Examen">
+                        <Eye className="size-4" />
+                    </Button>
+                ) : (
+                    <Button variant="outline" size="sm">
+                        <Eye className="size-4 mr-2" />
+                        Vista Previa
+                    </Button>
+                )}
             </DialogTrigger>
             <DialogContent className="max-w-4xl max-h-[85vh] flex flex-col">
                 <DialogHeader>
-                    <DialogTitle>Vista Previa del Examen para {residentName}</DialogTitle>
+                    <DialogTitle>
+                        {residentName ? `Vista Previa del Examen para ${residentName}` : "Vista Previa del Examen (General)"}
+                    </DialogTitle>
                 </DialogHeader>
                 
                 <div className="flex-1 overflow-y-auto pr-4 mt-4 space-y-6">

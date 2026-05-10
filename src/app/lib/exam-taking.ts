@@ -460,7 +460,7 @@ export async function getConsolidatedExamReportData(examId: string) {
     }
 }
 
-export async function generateExamPreview(examId: string, residentId: string) {
+export async function generateExamPreview(examId: string, residentId?: string) {
     const session = await auth()
     if (!session?.user || (session.user.role !== 'COORDINADOR' && session.user.role !== 'PROFESOR')) {
         throw new Error("No autorizado")
@@ -468,12 +468,12 @@ export async function generateExamPreview(examId: string, residentId: string) {
 
     const exam = await prisma.exam.findUnique({
         where: { id: examId },
-        include: { profiles: { where: { user_id: residentId } } }
+        include: residentId ? { profiles: { where: { user_id: residentId } } } : undefined
     })
 
     if (!exam) throw new Error("Examen no encontrado")
 
-    const profile = exam.profiles[0]
+    const profile = (exam as any).profiles?.[0]
     const selected: { id: string }[] = []
 
     if (profile) {

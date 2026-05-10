@@ -20,6 +20,7 @@ import { CreateFolderDialog } from "./create-folder-dialog"
 import { FolderActions } from "./folder-actions"
 import { ExamVisibilityToggle } from "./exam-visibility-toggle"
 import { EditExamDialog } from "./edit-exam-dialog"
+import { ExamPreviewDialog } from "./[examId]/assign/exam-preview-dialog"
 import { cn } from "@/lib/utils"
 
 export const dynamic = 'force-dynamic'
@@ -173,6 +174,12 @@ export default async function ExamsPage(props: Props) {
                                                         {exam.visible ? "Visible" : "Oculto"}
                                                     </span>
                                                     <ExamVisibilityToggle examId={exam.id} isVisible={exam.visible !== false} />
+                                                    <ExamPreviewDialog 
+                                                        examId={exam.id} 
+                                                        iconOnly={true} 
+                                                        residentId={exam.profiles && exam.profiles.length > 0 ? exam.profiles[0].user_id : undefined}
+                                                        residentName={exam.profiles && exam.profiles.length > 0 ? exam.profiles[0].user.nombre : undefined}
+                                                    />
 
                                                     {/* Link to results for professors */}
                                                     <Button asChild size="sm" variant="outline">
