@@ -3,11 +3,10 @@
 import { useActionState, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { authenticate } from '@/app/lib/actions';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ForgotPasswordDialog } from './forgot-password-dialog';
-import { Activity, Dna, AlertCircle, Clock } from 'lucide-react';
+import { Activity, Dna, AlertCircle, Clock, BookOpen } from 'lucide-react';
 
 export default function LoginForm() {
     const searchParams = useSearchParams();
@@ -23,38 +22,34 @@ export default function LoginForm() {
         <div className="w-full">
             {/* Logo / Header */}
             <div className="text-center mb-8">
-                <div className="inline-flex items-center gap-2 mb-3">
-                    <span className="text-3xl font-black tracking-wider text-white">UCR</span>
-                    <span className="text-2xl font-thin text-sky-400 mx-1">|</span>
-                    <span className="text-3xl font-black tracking-wider text-sky-300">SEP</span>
+                <div className="inline-flex items-center justify-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center">
+                        <BookOpen className="size-5 text-white" />
+                    </div>
+                    <div className="text-left">
+                        <div className="flex items-center gap-1.5">
+                            <span className="text-xl font-black text-slate-800 tracking-wide">UCR</span>
+                            <span className="text-xl text-blue-400 font-light">|</span>
+                            <span className="text-xl font-black text-blue-600 tracking-wide">SEP</span>
+                        </div>
+                        <p className="text-[10px] text-slate-400 tracking-widest uppercase leading-tight">Medicina Familiar</p>
+                    </div>
                 </div>
-                <p className="text-xs text-sky-400/70 tracking-widest uppercase">
-                    Sistema de Postgrados Médicos (SEP)
-                </p>
-                <p className="text-xs text-slate-400/60 tracking-wider mt-0.5">
-                    Universidad de Costa Rica
-                </p>
+                <h1 className="text-2xl font-bold text-slate-800">Bienvenido</h1>
+                <p className="text-sm text-slate-500 mt-1">Sistema de Postgrados Médicos · UCR</p>
             </div>
 
-            {/* Glass Panel */}
-            <div className="glass-panel rounded-2xl p-8 relative overflow-hidden">
-                {/* Subtle corner decorations */}
-                <div className="absolute top-4 left-4 text-sky-500/20">
-                    <Activity className="size-7" />
-                </div>
-                <div className="absolute top-4 right-4 text-sky-500/20">
-                    <Dna className="size-7" />
-                </div>
-
+            {/* Card */}
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-100">
                 <form
                     action={formAction}
                     autoComplete="off"
                     onSubmit={() => sessionStorage.setItem('session_active', 'true')}
                     className="space-y-5"
                 >
-                    <div className="space-y-2">
-                        <Label htmlFor="cedula" className="text-sky-300/80 text-xs tracking-widest uppercase font-semibold">
-                            Usuario
+                    <div className="space-y-1.5">
+                        <Label htmlFor="cedula" className="text-slate-700 text-sm font-semibold">
+                            Cédula / Usuario
                         </Label>
                         <Input
                             id="cedula"
@@ -64,12 +59,12 @@ export default function LoginForm() {
                             required
                             autoComplete="off"
                             defaultValue=""
-                            className="bg-white/5 border-sky-500/25 text-white placeholder:text-white/25 focus:border-sky-400/60 h-11"
+                            className="h-11 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 bg-slate-50"
                         />
                     </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="password" className="text-sky-300/80 text-xs tracking-widest uppercase font-semibold">
+                    <div className="space-y-1.5">
+                        <Label htmlFor="password" className="text-slate-700 text-sm font-semibold">
                             Contraseña
                         </Label>
                         <Input
@@ -78,40 +73,31 @@ export default function LoginForm() {
                             type="password"
                             required
                             autoComplete="new-password"
-                            className="bg-white/5 border-sky-500/25 text-white placeholder:text-white/25 focus:border-sky-400/60 h-11"
+                            className="h-11 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 bg-slate-50"
                         />
                     </div>
 
                     {errorMessage && (
-                        <div className="flex items-center gap-2 text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg p-3">
+                        <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">
                             <AlertCircle className="size-4 flex-shrink-0" />
                             {errorMessage}
                         </div>
                     )}
 
                     {timeoutMessage && (
-                        <div className="flex items-center gap-2 text-sm text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
+                        <div className="flex items-center gap-2 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3">
                             <Clock className="size-4 flex-shrink-0" />
                             {timeoutMessage}
                         </div>
                     )}
 
-                    <div className="pt-2 space-y-3">
+                    <div className="pt-1 space-y-3">
                         <button
                             type="submit"
                             disabled={isPending}
-                            className="w-full h-12 rounded-lg font-bold text-sm tracking-widest uppercase transition-all duration-200 disabled:opacity-60"
-                            style={{
-                                background: isPending
-                                    ? 'rgba(14,165,233,0.15)'
-                                    : 'linear-gradient(135deg, rgba(14,165,233,0.2) 0%, rgba(56,189,248,0.15) 100%)',
-                                border: '1.5px solid rgba(14, 165, 233, 0.5)',
-                                color: '#7dd3fc',
-                                boxShadow: '0 2px 12px rgba(14, 165, 233, 0.15)',
-                            }}
+                            className="w-full h-11 rounded-xl font-semibold text-sm tracking-wide bg-blue-600 hover:bg-blue-700 text-white transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed shadow-sm shadow-blue-200"
                         >
-                            <span className="block">{isPending ? 'Verificando...' : 'Iniciar Sesión'}</span>
-                            <span className="block text-[10px] font-normal tracking-wider opacity-50 -mt-0.5">SEP UCR</span>
+                            {isPending ? 'Verificando...' : 'Iniciar Sesión'}
                         </button>
 
                         <div className="flex justify-center">
@@ -121,9 +107,12 @@ export default function LoginForm() {
                 </form>
             </div>
 
-            <p className="text-center text-xs text-sky-400/25 mt-6 tracking-widest uppercase">
-                Bienvenidos al SEP · Medicina Familiar
-            </p>
+            {/* Footer icons */}
+            <div className="flex items-center justify-center gap-3 mt-6">
+                <Activity className="size-4 text-slate-300" />
+                <p className="text-xs text-slate-400 tracking-widest uppercase">Universidad de Costa Rica</p>
+                <Dna className="size-4 text-slate-300" />
+            </div>
         </div>
     );
 }

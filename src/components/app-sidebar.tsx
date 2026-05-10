@@ -93,10 +93,10 @@ export function AppSidebar({ role, originalRole, isStudentView, ...props }: { ro
                     <div className="flex-1 text-left leading-tight">
                         <div className="flex items-center gap-1">
                             <span className="font-black text-sm tracking-wider text-white">UCR</span>
-                            <span className="font-thin text-cyan-400 mx-0.5">|</span>
-                            <span className="font-black text-sm tracking-wider neon-text">SEP</span>
+                            <span className="font-thin text-sky-400 mx-0.5">|</span>
+                            <span className="font-black text-sm tracking-wider text-sky-300">SEP</span>
                         </div>
-                        <span className="text-[10px] text-cyan-400/50 uppercase tracking-widest">Medicina Familiar</span>
+                        <span className="text-[10px] text-slate-400 uppercase tracking-widest">Medicina Familiar</span>
                     </div>
                 </div>
             </SidebarHeader>
