@@ -9,7 +9,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import { Eye, Loader2, CheckCircle } from "lucide-react"
+import { Eye, FileSearch, Loader2, CheckCircle } from "lucide-react"
 import { generateExamPreview } from "@/app/lib/exam-taking"
 import { Badge } from "@/components/ui/badge"
 
@@ -42,11 +42,11 @@ export function ExamPreviewDialog({ examId, residentId, residentName, iconOnly =
             <DialogTrigger asChild>
                 {iconOnly ? (
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50" title="Vista Previa del Examen">
-                        <Eye className="size-4" />
+                        <FileSearch className="size-4" />
                     </Button>
                 ) : (
                     <Button variant="outline" size="sm">
-                        <Eye className="size-4 mr-2" />
+                        <FileSearch className="size-4 mr-2" />
                         Vista Previa
                     </Button>
                 )}
