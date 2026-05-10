@@ -17,11 +17,17 @@ export async function startExam(examId: string) {
             exam_id: examId,
             user_id: session.user.id,
             status: 'IN_PROGRESS'
-        }
+        },
+        include: { answers: true }
     })
 
     if (existingAttempt) {
-        return { success: true, attemptId: existingAttempt.id }
+        if (existingAttempt.answers.length > 0) {
+            return { success: true, attemptId: existingAttempt.id }
+        } else {
+            // Delete the empty attempt so we can regenerate it correctly
+            await prisma.examAttempt.delete({ where: { id: existingAttempt.id } })
+        }
     }
 
     // Check if user already submitted (optional, maybe allow 1 attempt)
@@ -117,6 +123,10 @@ export async function startExam(examId: string) {
 
         // Just in case we missed some due to lack of questions in DB, check count?
         // Ideally we warn, but for now we proceed with what we got.
+    }
+
+    if (selected.length === 0) {
+        return { success: false, error: "No se encontraron preguntas publicadas para las categorías configuradas." }
     }
 
     // Create Attempt and Answers

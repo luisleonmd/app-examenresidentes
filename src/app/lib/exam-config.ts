@@ -49,7 +49,7 @@ export function calculateQuestionDistribution(totalQuestions: number, categoryNa
 
     // 1. Separate into Rotations and Courses
     const rotations = categoryNames.filter(c => CATEGORY_CONFIG[c.name]?.type === 'ROTATION');
-    const courses = categoryNames.filter(c => CATEGORY_CONFIG[c.name]?.type === 'COURSE');
+    const courses = categoryNames.filter(c => CATEGORY_CONFIG[c.name]?.type !== 'ROTATION'); // Treat unknown categories as COURSE
 
     // 2. Calculate Targets
     // If only rotations or only courses selected, give them 100%
