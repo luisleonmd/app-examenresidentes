@@ -12,6 +12,8 @@ import { auth, signOut } from "@/auth"
 import { SearchButton } from "@/components/search-button"
 import { NotificationsBell } from "@/components/notifications-bell"
 import { ChangePasswordDialog } from "@/components/change-password-dialog"
+import { cookies } from "next/headers"
+import { StudentViewBanner } from "@/components/student-view-toggle"
 
 export const dynamic = 'force-dynamic'
 
@@ -21,13 +23,17 @@ export default async function DashboardLayout({
     children: React.ReactNode
 }) {
     const session = await auth()
+    const isStudentView = (await cookies()).get('student_view')?.value === 'true'
+    const effectiveRole = isStudentView ? 'RESIDENTE' : session?.user?.role
+
     return (
         <SidebarProvider>
             <SessionTimeout />
             <InactivityMonitor />
             <BrowserSessionGuard />
-            <AppSidebar role={session?.user?.role} />
-            <SidebarInset>
+            <AppSidebar role={effectiveRole} originalRole={session?.user?.role} isStudentView={isStudentView} />
+            <SidebarInset className="flex flex-col h-screen overflow-hidden">
+                {isStudentView && <StudentViewBanner />}
                 <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 border-b px-4 justify-between bg-card">
                     <div className="flex items-center gap-2">
                         <SidebarTrigger className="-ml-1" />
@@ -51,7 +57,7 @@ export default async function DashboardLayout({
                         </form>
                     </div>
                 </header>
-                <main className="flex flex-1 flex-col gap-4 p-4 pt-0 mt-4">
+                <main className="flex-1 overflow-y-auto p-4">
                     {children}
                 </main>
             </SidebarInset>

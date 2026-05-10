@@ -14,6 +14,8 @@ import {
     AlertCircle
 } from "lucide-react"
 
+import { ToggleStudentViewButton } from "./student-view-toggle"
+
 import {
     Sidebar,
     SidebarContent,
@@ -62,7 +64,7 @@ const items = [
     },
 ]
 
-export function AppSidebar({ role, ...props }: { role?: string } & React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ role, originalRole, isStudentView, ...props }: { role?: string, originalRole?: string, isStudentView?: boolean } & React.ComponentProps<typeof Sidebar>) {
     // Generar items dinámicamente para no mutar la constante global
     const navItems = items.flatMap(item => {
         // Clonar el item para no modificar la referencia global
@@ -81,6 +83,8 @@ export function AppSidebar({ role, ...props }: { role?: string } & React.Compone
 
         return [newItem]
     })
+
+    const canToggleStudentView = (originalRole === 'COORDINADOR' || originalRole === 'PROFESOR') && !isStudentView;
 
     return (
         <Sidebar collapsible="icon" {...props}>
@@ -114,6 +118,11 @@ export function AppSidebar({ role, ...props }: { role?: string } & React.Compone
             </SidebarContent>
             <SidebarFooter>
                 <SidebarMenu>
+                    {canToggleStudentView && (
+                        <SidebarMenuItem>
+                            <ToggleStudentViewButton />
+                        </SidebarMenuItem>
+                    )}
                     <SidebarMenuItem>
                         <div className="flex items-center gap-2 p-2 border-t">
                             <User className="size-4 opacity-50" />

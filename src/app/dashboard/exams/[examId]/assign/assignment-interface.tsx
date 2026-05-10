@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { assignExamProfile, deleteExamProfile } from "@/app/lib/exam-profiles"
 import { Search } from "lucide-react"
+import { ExamPreviewDialog } from "./exam-preview-dialog"
 
 type ProfileConfig = {
     categoryId: string
@@ -191,7 +192,12 @@ export function AssignmentInterface({ examId, users, categories, initialProfiles
                                 <div className="text-sm font-medium">
                                     Total Preguntas: {config.reduce((acc, curr) => acc + curr.count, 0)}
                                 </div>
-                                <div className="flex gap-2">
+                                <div className="flex gap-2 items-center">
+                                    <ExamPreviewDialog 
+                                        examId={examId} 
+                                        residentId={selectedUser} 
+                                        residentName={users.find(u => u.id === selectedUser)?.nombre || ''} 
+                                    />
                                     {savedProfiles.has(selectedUser) && (
                                         <Button variant="destructive" onClick={handleDelete} disabled={loading}>
                                             Restablecer

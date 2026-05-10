@@ -83,11 +83,15 @@ export async function deleteExamFolder(id: string) {
 
 export async function getExamFolders() {
     const session = await auth()
+    const { cookies } = await import('next/headers')
+    const isStudentView = (await cookies()).get('student_view')?.value === 'true'
+    const effectiveRole = isStudentView ? 'RESIDENTE' : session?.user?.role
+    
     const whereClause: any = {}
 
-    if (session?.user?.role === 'RESIDENTE') {
+    if (effectiveRole === 'RESIDENTE') {
         const enrollments = await prisma.enrollment.findMany({
-            where: { user_id: session.user.id },
+            where: { user_id: session?.user?.id },
             select: { course_id: true }
         })
         const courseIds = enrollments.map(e => e.course_id)
@@ -107,13 +111,13 @@ export async function getExamFolders() {
                             {
                                 OR: [
                                     { profiles: { none: {} } },
-                                    { profiles: { some: { user_id: session.user.id } } }
+                                    { profiles: { some: { user_id: session?.user?.id } } }
                                 ]
                             }
                         ]
                     },
                     {
-                        attempts: { some: { user_id: session.user.id } }
+                        attempts: { some: { user_id: session?.user?.id } }
                     }
                 ]
             }
@@ -189,6 +193,10 @@ export async function moveFolder(folderId: string, direction: 'up' | 'down') {
 export async function getExams(folderId?: string | null) {
     const session = await auth()
     try {
+        const { cookies } = await import('next/headers')
+        const isStudentView = (await cookies()).get('student_view')?.value === 'true'
+        const effectiveRole = isStudentView ? 'RESIDENTE' : session?.user?.role
+
         // If Resident, filter by course enrollment
         const whereClause: any = {}
 
@@ -204,10 +212,10 @@ export async function getExams(folderId?: string | null) {
         }
         // Actually, if we want "Folders View", `getExams` should probably return exams in the current folder (or root if null).
 
-        if (session?.user?.role === 'RESIDENTE') {
+        if (effectiveRole === 'RESIDENTE') {
             // 1. Get user enrollments
             const enrollments = await prisma.enrollment.findMany({
-                where: { user_id: session.user.id },
+                where: { user_id: session?.user?.id },
                 select: { course_id: true }
             })
             const courseIds = enrollments.map(e => e.course_id)
@@ -229,13 +237,13 @@ export async function getExams(folderId?: string | null) {
                         {
                             OR: [
                                 { profiles: { none: {} } }, // General exam
-                                { profiles: { some: { user_id: session.user.id } } } // Assigned to me
+                                { profiles: { some: { user_id: session?.user?.id } } } // Assigned to me
                             ]
                         }
                     ]
                 },
                 {
-                    attempts: { some: { user_id: session.user.id } }
+                    attempts: { some: { user_id: session?.user?.id } }
                 }
             ]
         }

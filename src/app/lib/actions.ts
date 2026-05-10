@@ -132,3 +132,21 @@ export async function resetPassword(formData: FormData) {
         return { error: 'Error al procesar la solicitud.' };
     }
 }
+
+import { cookies } from 'next/headers';
+
+export async function toggleStudentView(active: boolean) {
+    const session = await auth();
+    if (!session?.user || (session.user.role !== 'COORDINADOR' && session.user.role !== 'PROFESOR')) {
+        return { success: false, message: 'No autorizado' };
+    }
+    
+    if (active) {
+        (await cookies()).set('student_view', 'true', { path: '/', httpOnly: true });
+    } else {
+        (await cookies()).delete('student_view');
+    }
+    
+    revalidatePath('/dashboard');
+    return { success: true };
+}

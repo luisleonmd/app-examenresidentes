@@ -459,3 +459,88 @@ export async function getConsolidatedExamReportData(examId: string) {
         reports
     }
 }
+
+export async function generateExamPreview(examId: string, residentId: string) {
+    const session = await auth()
+    if (!session?.user || (session.user.role !== 'COORDINADOR' && session.user.role !== 'PROFESOR')) {
+        throw new Error("No autorizado")
+    }
+
+    const exam = await prisma.exam.findUnique({
+        where: { id: examId },
+        include: { profiles: { where: { user_id: residentId } } }
+    })
+
+    if (!exam) throw new Error("Examen no encontrado")
+
+    const profile = exam.profiles[0]
+    const selected: { id: string }[] = []
+
+    if (profile) {
+        // Personalized Generation
+        const config = JSON.parse(profile.configuration) as { categoryId: string, count: number }[]
+
+        for (const rule of config) {
+            if (rule.count <= 0) continue
+
+            const questionIds = await prisma.question.findMany({
+                where: { status: 'PUBLISHED', category_id: rule.categoryId },
+                select: { id: true }
+            })
+
+            const shuffled = questionIds.sort(() => 0.5 - Math.random())
+            selected.push(...shuffled.slice(0, rule.count))
+        }
+    } else {
+        // Standard Generation
+        const validCategoryIds: string[] = []
+        try {
+            const rawCategories = JSON.parse(exam.categories || '[]')
+            if (Array.isArray(rawCategories)) {
+                validCategoryIds.push(...rawCategories)
+            }
+        } catch (e) {
+            // Invalid JSON
+        }
+
+        if (validCategoryIds.length === 0) throw new Error("El examen no tiene categorías configuradas.")
+
+        const categories = await prisma.questionCategory.findMany({
+            where: { id: { in: validCategoryIds } },
+            select: { id: true, name: true }
+        })
+
+        const distribution = calculateQuestionDistribution(exam.total_questions, categories)
+
+        for (const rule of distribution) {
+            const questionIds = await prisma.question.findMany({
+                where: { status: 'PUBLISHED', category_id: rule.categoryId },
+                select: { id: true }
+            })
+
+            const shuffled = questionIds.sort(() => 0.5 - Math.random())
+            selected.push(...shuffled.slice(0, rule.count))
+        }
+    }
+
+    if (selected.length === 0) {
+        throw new Error("No se encontraron preguntas publicadas para las categorías configuradas.")
+    }
+
+    // Fetch the actual questions to preview
+    const questions = await prisma.question.findMany({
+        where: { id: { in: selected.map(s => s.id) } },
+        include: { category: true }
+    })
+
+    // Return them in the order they were selected
+    const orderedQuestions = selected.map(s => questions.find(q => q.id === s.id)).filter(Boolean)
+
+    return orderedQuestions.map((q: any) => ({
+        id: q.id,
+        text: q.text,
+        category: q.category?.name,
+        options: JSON.parse(q.options),
+        explanation: q.explanation
+    }))
+}
