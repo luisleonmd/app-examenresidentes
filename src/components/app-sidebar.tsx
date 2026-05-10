@@ -89,13 +89,14 @@ export function AppSidebar({ role, originalRole, isStudentView, ...props }: { ro
     return (
         <Sidebar collapsible="icon" {...props}>
             <SidebarHeader>
-                <div className="flex items-center gap-2 p-2">
-                    <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                        <SquareTerminal className="size-4" />
-                    </div>
-                    <div className="grid flex-1 text-left text-sm leading-tight">
-                        <span className="truncate font-semibold">UCR Medicina Familiar</span>
-                        <span className="truncate text-xs">Evaluación Residentes</span>
+                <div className="flex items-center gap-2 p-3">
+                    <div className="flex-1 text-left leading-tight">
+                        <div className="flex items-center gap-1">
+                            <span className="font-black text-sm tracking-wider text-white">UCR</span>
+                            <span className="font-thin text-cyan-400 mx-0.5">|</span>
+                            <span className="font-black text-sm tracking-wider neon-text">SEP</span>
+                        </div>
+                        <span className="text-[10px] text-cyan-400/50 uppercase tracking-widest">Medicina Familiar</span>
                     </div>
                 </div>
             </SidebarHeader>
