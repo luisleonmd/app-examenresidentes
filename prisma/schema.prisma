@@ -72,6 +72,7 @@ model Question {
   category           QuestionCategory @relation(fields: [category_id], references: [id])
   author_id          String
   author             User             @relation(fields: [author_id], references: [id])
+  source             String           @default("MANUAL") // MANUAL, JSON_BANK
   status             String // DRAFT, PUBLISHED, DEPRECATED
   created_at         DateTime         @default(now())
 

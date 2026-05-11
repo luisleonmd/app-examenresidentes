@@ -66,6 +66,7 @@ export async function syncQuestionBank(questions: UnifiedQuestion[]) {
                         options: optionsJson,
                         explanation: q.explanation,
                         image_url: q.image_url,
+                        source: "JSON_BANK"
                         // We do not change author or created_at
                     }
                 })
@@ -80,7 +81,8 @@ export async function syncQuestionBank(questions: UnifiedQuestion[]) {
                         explanation: q.explanation,
                         image_url: q.image_url,
                         author_id: session.user.id,
-                        status: 'PUBLISHED'
+                        status: 'PUBLISHED',
+                        source: "JSON_BANK"
                     }
                 })
                 createdCount++

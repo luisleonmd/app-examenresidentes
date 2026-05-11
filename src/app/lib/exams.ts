@@ -552,3 +552,36 @@ export async function deleteExamsByTitle(title: string) {
         }
     }
 }
+
+export async function createExamFromBank(data: { title: string, categoryIds: string[], totalQuestions: number }) {
+    const session = await auth()
+    if (!session?.user || session.user.role !== 'COORDINADOR') {
+        return { success: false, error: "Unauthorized" }
+    }
+
+    try {
+        const now = new Date()
+        const nextYear = new Date()
+        nextYear.setFullYear(now.getFullYear() + 1)
+
+        await prisma.exam.create({
+            data: {
+                title: data.title,
+                created_by: session.user.id,
+                duration_minutes: data.totalQuestions * 1.5, // 1.5 minutes per question
+                start_window: now,
+                end_window: nextYear,
+                total_questions: data.totalQuestions,
+                categories: JSON.stringify(data.categoryIds),
+                rules: JSON.stringify({}),
+                // We leave course_id and folder_id null for these generic exams
+            }
+        })
+
+        revalidatePath('/dashboard/exams')
+        return { success: true }
+    } catch (error) {
+        console.error("Failed to create exam from bank:", error)
+        return { success: false, error: "Error al crear el examen." }
+    }
+}

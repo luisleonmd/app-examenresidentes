@@ -21,7 +21,6 @@ import { CreateQuestionDialog } from "../questions/create-question-dialog"
 import { ImportQuestionsDialog } from "../questions/import-questions-dialog"
 import { ImportMoodleDialog } from "../questions/import-moodle-dialog"
 import { ImportJSONDialog } from "../questions/import-json-dialog"
-import { SyncBankDialog } from "../questions/sync-bank-dialog"
 import { ExportQuestionsButton } from "../questions/export-questions-button"
 import { ExportMoodleButton } from "../questions/export-moodle-button"
 
@@ -38,7 +37,7 @@ export default async function CategoriesPage(props: {
         redirect('/dashboard')
     }
 
-    const categories = await getCategories()
+    const categories = await getCategories('MANUAL')
     const isCoordinador = session?.user.role === 'COORDINADOR'
 
     return (
@@ -62,7 +61,6 @@ export default async function CategoriesPage(props: {
                                 <>
                                     <ExportQuestionsButton categoryId={searchParams.category} />
                                     <ExportMoodleButton categoryId={searchParams.category} />
-                                    <SyncBankDialog />
                                     <ImportJSONDialog />
                                     <ImportMoodleDialog />
                                     <ImportQuestionsDialog />

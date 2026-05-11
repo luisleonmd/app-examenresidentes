@@ -11,7 +11,8 @@ import {
     User,
     Users,
     FileText,
-    AlertCircle
+    AlertCircle,
+    Database
 } from "lucide-react"
 
 import { ToggleStudentViewButton } from "./student-view-toggle"
@@ -53,6 +54,12 @@ const items = [
         roles: ['COORDINADOR']
     },
     {
+        title: "Casos Clínicos IA",
+        url: "/dashboard/casos-clinicos",
+        icon: Database,
+        roles: ['COORDINADOR']
+    },
+    {
         title: "Exámenes",
         url: "/dashboard/exams",
         icon: FileText,
@@ -71,6 +78,7 @@ export function AppSidebar({ role, originalRole, isStudentView, ...props }: { ro
         const newItem = { ...item }
 
         if (newItem.title === "Usuarios" && role !== 'COORDINADOR') return []
+        if (newItem.title === "Casos Clínicos IA" && role !== 'COORDINADOR') return []
         // Eliminar Banco de Preguntas ya que se fusionó con Categorías
         if (newItem.title === "Banco de Preguntas") return []
         // Categorías ahora es accesible para todos los roles excepto RESIDENTE
