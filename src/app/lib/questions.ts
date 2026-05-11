@@ -107,6 +107,14 @@ export async function createQuestion(data: any) {
 }
 
 export async function deleteQuestion(id: string) {
+    const session = await auth()
+    const isCoordinator = session?.user?.role === 'COORDINADOR';
+    const hasPermission = session?.user?.permissions?.includes('MANAGE_QUESTIONS');
+
+    if (!session?.user || (!isCoordinator && !hasPermission)) {
+        return { success: false, error: "Unauthorized" }
+    }
+
     try {
         await prisma.question.update({
             where: { id },
