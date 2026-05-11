@@ -14,7 +14,7 @@ import { SyncBankDialog } from "../questions/sync-bank-dialog"
 import { Database, Lightbulb } from "lucide-react"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { GenerateExamFromBankButton } from "./generate-exam-button"
+import { CreateExamDialog } from "../exams/create-exam-dialog"
 
 export default async function CasosClinicosPage(props: {
     searchParams: Promise<{ category?: string }>
@@ -48,9 +48,7 @@ export default async function CasosClinicosPage(props: {
             </div>
 
             <div className="flex justify-end mb-4">
-                <GenerateExamFromBankButton 
-                    availableRotations={categories.map(c => ({ id: c.id, name: c.name, count: c._count?.questions || 0 }))} 
-                />
+                <CreateExamDialog source="JSON_BANK" />
             </div>
 
             <div className="border rounded-md bg-card">

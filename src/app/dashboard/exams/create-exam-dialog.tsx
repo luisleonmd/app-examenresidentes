@@ -63,9 +63,10 @@ const EXAM_TYPES = [
 
 interface Props {
     defaultFolderId?: string
+    source?: string
 }
 
-export function CreateExamDialog({ defaultFolderId }: Props) {
+export function CreateExamDialog({ defaultFolderId, source }: Props) {
     const [open, setOpen] = useState(false)
     const [residents, setResidents] = useState<any[]>([])
     const [categories, setCategories] = useState<any[]>([])
@@ -85,9 +86,9 @@ export function CreateExamDialog({ defaultFolderId }: Props) {
     useEffect(() => {
         // Fetch residents instead of courses
         fetch('/api/residents').then(r => r.json()).then(setResidents).catch(() => { })
-        getCategories().then(setCategories)
+        getCategories(source).then(setCategories)
         getExamFolders().then(setFolders).catch(() => { })
-    }, [])
+    }, [source])
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         // Construct Title
