@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Eye, Loader2 } from "lucide-react"
+import { Eye, Loader2, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
     Dialog,
@@ -34,6 +34,7 @@ export function ViewCategoryQuestionsButton({
     const [open, setOpen] = useState(false)
     const [questions, setQuestions] = useState<any[]>([])
     const [loading, setLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
     const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
@@ -48,11 +49,17 @@ export function ViewCategoryQuestionsButton({
 
     const fetchQuestions = async () => {
         setLoading(true)
+        setError(null)
         try {
             const data = await getQuestions(categoryId)
-            setQuestions(data)
-        } catch (error) {
-            console.error("Failed to fetch questions:", error)
+            if (!data) {
+                setError("El servidor devolvió un valor nulo.")
+            } else {
+                setQuestions(data)
+            }
+        } catch (err: any) {
+            console.error("Failed to fetch questions:", err)
+            setError(err.message || String(err))
         } finally {
             setLoading(false)
         }
@@ -96,6 +103,14 @@ export function ViewCategoryQuestionsButton({
                     {loading ? (
                         <div className="flex justify-center items-center py-10">
                             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                        </div>
+                    ) : error ? (
+                        <div className="text-center py-10 text-red-600 bg-red-50 rounded-md p-4 border border-red-200">
+                            <p className="font-semibold flex items-center justify-center gap-1.5 mb-1 text-sm">
+                                <AlertCircle className="size-4" />
+                                Error al cargar preguntas
+                            </p>
+                            <p className="text-xs font-mono">{error}</p>
                         </div>
                     ) : questions.length === 0 ? (
                         <div className="text-center py-10 text-muted-foreground">
