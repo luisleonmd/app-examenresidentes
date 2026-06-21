@@ -13,10 +13,28 @@ export async function deleteAllCategoriesAndQuestions() {
     }
 
     try {
-        // Delete all questions first (foreign key constraint)
+        // 1. Delete Claim Attachments
+        await prisma.claimAttachment.deleteMany({})
+
+        // 2. Delete Claims
+        await prisma.claim.deleteMany({})
+
+        // 3. Delete Answers
+        await prisma.answer.deleteMany({})
+
+        // 4. Delete Exam Attempts
+        await prisma.examAttempt.deleteMany({})
+
+        // 5. Delete Exam Profiles
+        await prisma.examProfile.deleteMany({})
+
+        // 6. Delete Exams
+        await prisma.exam.deleteMany({})
+
+        // 7. Delete Questions
         const deletedQuestions = await prisma.question.deleteMany({})
 
-        // Then delete all categories
+        // 8. Delete Question Categories
         const deletedCategories = await prisma.questionCategory.deleteMany({})
 
         return {
@@ -24,8 +42,8 @@ export async function deleteAllCategoriesAndQuestions() {
             deletedQuestions: deletedQuestions.count,
             deletedCategories: deletedCategories.count
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error("Failed to delete all data:", error)
-        return { success: false, error: "Error al eliminar los datos" }
+        return { success: false, error: "Error al eliminar los datos: " + error.message }
     }
 }

@@ -8,10 +8,10 @@ export interface CategoryConfig {
 export const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
     // Rotations (70% total weight, distributed by duration)
     "Medicina Interna": { type: 'ROTATION', durationMonths: 6 },
-    "Geriatría": { type: 'ROTATION', durationMonths: 4 },
-    "Ginecología": { type: 'ROTATION', durationMonths: 4 },
-    "Pediatría": { type: 'ROTATION', durationMonths: 6 },
-    "Fisiatría": { type: 'ROTATION', durationMonths: 2 },
+    "Geriatría": { type: 'ROTATION', durationMonths: 5 },
+    "Ginecología": { type: 'ROTATION', durationMonths: 5 },
+    "Pediatría": { type: 'ROTATION', durationMonths: 5 },
+    "Fisiatría": { type: 'ROTATION', durationMonths: 3 },
     "Psiquiatría": { type: 'ROTATION', durationMonths: 3 },
     "Dermatología": { type: 'ROTATION', durationMonths: 2 },
     "Neonatología": { type: 'ROTATION', durationMonths: 1 },
@@ -20,7 +20,7 @@ export const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
     "Oftalmología": { type: 'ROTATION', durationMonths: 1 },
     "Ortopedia": { type: 'ROTATION', durationMonths: 1 },
     "Comunidad 1": { type: 'ROTATION', durationMonths: 4 },
-    "Comunidad 2": { type: 'ROTATION', durationMonths: 12 },
+    "Comunidad 2": { type: 'ROTATION', durationMonths: 6 },
     "Clínica VIH": { type: 'ROTATION', durationMonths: 1 },
 
     // Courses (30% total weight, distributed equally)

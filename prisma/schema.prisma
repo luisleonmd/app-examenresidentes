@@ -52,10 +52,11 @@ model Enrollment {
 }
 
 model QuestionCategory {
-  id          String     @id @default(uuid())
-  name        String
-  description String?
-  questions   Question[]
+  id           String     @id @default(uuid())
+  name         String
+  description  String?
+  questions    Question[]
+  bibliography String?    // Bibliography configuration for rotation or course
 }
 
 model Question {
@@ -74,6 +75,7 @@ model Question {
   author             User             @relation(fields: [author_id], references: [id])
   source             String           @default("MANUAL") // MANUAL, JSON_BANK
   status             String // DRAFT, PUBLISHED, DEPRECATED
+  difficulty         String           @default("MEDIA") // ALTA, MEDIA
   created_at         DateTime         @default(now())
 
   answers Answer[]

@@ -7,6 +7,47 @@ import { calculateQuestionDistribution } from "./exam-config"
 
 const prisma = new PrismaClient()
 
+async function selectQuestionsWithDifficulty(categoryId: string, count: number): Promise<{ id: string }[]> {
+    const targetAlta = Math.round(count * 0.7)
+    const targetMedia = count - targetAlta
+
+    const questions = await prisma.question.findMany({
+        where: { status: 'PUBLISHED', category_id: categoryId },
+        select: { id: true, difficulty: true }
+    })
+
+    const altaQuestions = questions.filter(q => q.difficulty === 'ALTA')
+    const mediaQuestions = questions.filter(q => q.difficulty !== 'ALTA')
+
+    const shuffledAlta = altaQuestions.sort(() => 0.5 - Math.random())
+    const shuffledMedia = mediaQuestions.sort(() => 0.5 - Math.random())
+
+    const selected: { id: string }[] = []
+
+    const takenAlta = shuffledAlta.slice(0, targetAlta)
+    selected.push(...takenAlta.map(q => ({ id: q.id })))
+
+    const takenMedia = shuffledMedia.slice(0, targetMedia)
+    selected.push(...takenMedia.map(q => ({ id: q.id })))
+
+    let needed = count - selected.length
+    if (needed > 0) {
+        const remainingAlta = shuffledAlta.slice(targetAlta)
+        const remainingMedia = shuffledMedia.slice(targetMedia)
+
+        const backfillAlta = remainingAlta.slice(0, needed)
+        selected.push(...backfillAlta.map(q => ({ id: q.id })))
+        needed -= backfillAlta.length
+
+        if (needed > 0) {
+            const backfillMedia = remainingMedia.slice(0, needed)
+            selected.push(...backfillMedia.map(q => ({ id: q.id })))
+        }
+    }
+
+    return selected
+}
+
 export async function startExam(examId: string) {
     const session = await auth()
     if (!session?.user) throw new Error("Unauthorized")
@@ -76,15 +117,8 @@ export async function startExam(examId: string) {
         for (const rule of config) {
             if (rule.count <= 0) continue
 
-            // Get all IDs for this category
-            const questionIds = await prisma.question.findMany({
-                where: { status: 'PUBLISHED', category_id: rule.categoryId },
-                select: { id: true }
-            })
-
-            // Shuffle and take N
-            const shuffled = questionIds.sort(() => 0.5 - Math.random())
-            selected.push(...shuffled.slice(0, rule.count))
+            const categoryQuestions = await selectQuestionsWithDifficulty(rule.categoryId, rule.count)
+            selected.push(...categoryQuestions)
         }
 
     } else {
@@ -110,15 +144,8 @@ export async function startExam(examId: string) {
         const distribution = calculateQuestionDistribution(exam.total_questions, categories)
 
         for (const rule of distribution) {
-            // Get all IDs for this category
-            const questionIds = await prisma.question.findMany({
-                where: { status: 'PUBLISHED', category_id: rule.categoryId },
-                select: { id: true }
-            })
-
-            // Shuffle and take N
-            const shuffled = questionIds.sort(() => 0.5 - Math.random())
-            selected.push(...shuffled.slice(0, rule.count))
+            const categoryQuestions = await selectQuestionsWithDifficulty(rule.categoryId, rule.count)
+            selected.push(...categoryQuestions)
         }
 
         // Just in case we missed some due to lack of questions in DB, check count?
@@ -483,13 +510,8 @@ export async function generateExamPreview(examId: string, residentId?: string) {
         for (const rule of config) {
             if (rule.count <= 0) continue
 
-            const questionIds = await prisma.question.findMany({
-                where: { status: 'PUBLISHED', category_id: rule.categoryId },
-                select: { id: true }
-            })
-
-            const shuffled = questionIds.sort(() => 0.5 - Math.random())
-            selected.push(...shuffled.slice(0, rule.count))
+            const categoryQuestions = await selectQuestionsWithDifficulty(rule.categoryId, rule.count)
+            selected.push(...categoryQuestions)
         }
     } else {
         // Standard Generation
@@ -513,13 +535,8 @@ export async function generateExamPreview(examId: string, residentId?: string) {
         const distribution = calculateQuestionDistribution(exam.total_questions, categories)
 
         for (const rule of distribution) {
-            const questionIds = await prisma.question.findMany({
-                where: { status: 'PUBLISHED', category_id: rule.categoryId },
-                select: { id: true }
-            })
-
-            const shuffled = questionIds.sort(() => 0.5 - Math.random())
-            selected.push(...shuffled.slice(0, rule.count))
+            const categoryQuestions = await selectQuestionsWithDifficulty(rule.categoryId, rule.count)
+            selected.push(...categoryQuestions)
         }
     }
 
