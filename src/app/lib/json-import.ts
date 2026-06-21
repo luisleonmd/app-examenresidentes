@@ -84,12 +84,14 @@ export async function importQuestionsJSON(
             if (!item || typeof item !== "object") return item
 
             // Support English & Spanish synonyms for key fields
-            const text = item.text || item.pregunta || item.enunciado || "";
-            const explanation = item.explanation || item.explicacion || item.justificacion || item.justificacion_correcta || "";
+            const text = item.text || item.question || item.pregunta || item.enunciado || "";
             const category = item.category || item.categoria || item.tema || item.curso_rotacion || "";
             const imageUrl = item.image_url || item.imageUrl || item.imagen || undefined;
+            const hint = item.hint || item.pista || "";
             
-            let rawOptions = item.options || item.opciones || [];
+            let explanation = item.explanation || item.explicacion || item.justificacion || item.justificacion_correcta || item.rationale || "";
+            
+            let rawOptions = item.options || item.opciones || item.answerOptions || item.respuestas || [];
             let options: any[] = [];
             
             if (Array.isArray(rawOptions)) {
@@ -98,18 +100,35 @@ export async function importQuestionsJSON(
                     const optText = opt.text || opt.texto || opt.opcion || "";
                     const isCorrect = opt.is_correct !== undefined 
                         ? opt.is_correct 
-                        : (opt.correcta !== undefined 
-                            ? opt.correcta 
-                            : (opt.es_correcta !== undefined ? opt.es_correcta : false));
+                        : (opt.isCorrect !== undefined 
+                            ? opt.isCorrect 
+                            : (opt.correcta !== undefined 
+                                ? opt.correcta 
+                                : (opt.es_correcta !== undefined ? opt.es_correcta : false)));
                     return { text: optText, is_correct: isCorrect };
                 });
+
+                // Consolidate option-level rationales if present
+                const rationales = rawOptions
+                    .filter((opt: any) => opt && opt.rationale)
+                    .map((opt: any, idx: number) => {
+                        const letter = String.fromCharCode(65 + idx);
+                        return `**Opción ${letter}:** ${opt.rationale}`;
+                    });
+                if (rationales.length > 0) {
+                    explanation = (explanation ? explanation + "\n\n" : "") + "### Justificación de las opciones:\n" + rationales.join("\n");
+                }
             } else if (typeof rawOptions === 'object' && rawOptions !== null) {
                 // Support legacy format: options is an object like {"A": "...", "B": "..."}
-                const correctKey = item.respuesta_correcta || item.correcta || item.es_correcta || "";
+                const correctKey = item.respuesta_correcta || item.correcta || item.es_correcta || item.isCorrect || "";
                 options = Object.entries(rawOptions).map(([key, val]) => ({
                     text: String(val),
                     is_correct: correctKey === key
                 }));
+            }
+
+            if (hint) {
+                explanation = (explanation ? explanation + "\n\n" : "") + `**Pista/Sugerencia:** ${hint}`;
             }
 
             return {
