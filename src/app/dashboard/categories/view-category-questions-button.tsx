@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
-import { getQuestions } from "@/app/lib/questions"
 import { MarkdownRenderer } from "@/components/markdown-renderer"
 
 import { EditQuestionDialog } from "@/app/dashboard/questions/edit-question-dialog"
@@ -35,7 +34,6 @@ export function ViewCategoryQuestionsButton({
     const [questions, setQuestions] = useState<any[]>([])
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
-    const [debugInfo, setDebugInfo] = useState<any>(null)
     const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
@@ -51,17 +49,14 @@ export function ViewCategoryQuestionsButton({
     const fetchQuestions = async () => {
         setLoading(true)
         setError(null)
-        setDebugInfo(null)
         try {
-            const data = await getQuestions(categoryId)
-            if (!data) {
-                setError("El servidor devolvió un valor nulo.")
-            } else if (data.success === false) {
-                setError(data.error || "Error desconocido al procesar preguntas en el servidor.")
-            } else {
-                setQuestions(data.questions || [])
-                setDebugInfo(data.debug || null)
+            const res = await fetch(`/api/questions?categoryId=${categoryId}`)
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}))
+                throw new Error(errorData.error || `Error del servidor HTTP: ${res.status}`)
             }
+            const questionsData = await res.json()
+            setQuestions(questionsData)
         } catch (err: any) {
             console.error("Failed to fetch questions:", err)
             setError(err.message || String(err))
@@ -69,6 +64,7 @@ export function ViewCategoryQuestionsButton({
             setLoading(false)
         }
     }
+
 
     if (!mounted) {
         return (
@@ -118,17 +114,10 @@ export function ViewCategoryQuestionsButton({
                             <p className="text-xs font-mono">{error}</p>
                         </div>
                     ) : questions.length === 0 ? (
-                        <div className="text-center py-10 text-muted-foreground space-y-4">
-                            <p>No hay preguntas en esta categoría.</p>
-                            {debugInfo && (
-                                <div className="max-w-md mx-auto text-left bg-slate-50 p-4 rounded border text-[11px] font-mono space-y-1 text-slate-600">
-                                    <p className="font-bold text-slate-800 border-b pb-1 mb-1 text-xs">Información de Depuración:</p>
-                                    <p>ID Categoría Recibido: {debugInfo.categoryIdPassed}</p>
-                                    <p>Filtro Utilizado: {JSON.stringify(debugInfo.whereClauseUsed)}</p>
-                                    <p>Preguntas en BD (sin filtros): {debugInfo.countInDbRaw}</p>
-                                </div>
-                            )}
+                        <div className="text-center py-10 text-muted-foreground">
+                            No hay preguntas en esta categoría.
                         </div>
+
                     ) : (
                         <ScrollArea className="h-[60vh] pr-4">
                             <div className="space-y-6">
