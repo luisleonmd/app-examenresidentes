@@ -68,7 +68,7 @@ export async function getQuestions(categoryId?: string, source?: string) {
             },
             orderBy: { created_at: 'desc' }
         })
-        return questions
+        return JSON.parse(JSON.stringify(questions))
     } catch (error) {
         console.error("Failed to fetch questions:", error)
         throw new Error("Failed to fetch questions")
