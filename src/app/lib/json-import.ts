@@ -17,6 +17,19 @@ interface JSONQuestion {
     }>
 }
 
+function findFirstArray(obj: any): any[] | null {
+    if (Array.isArray(obj)) {
+        return obj;
+    }
+    if (obj && typeof obj === 'object') {
+        for (const value of Object.values(obj)) {
+            const found = findFirstArray(value);
+            if (found) return found;
+        }
+    }
+    return null;
+}
+
 function cleanAndParseJSON(jsonStr: string): any {
     let cleanStr = jsonStr.trim()
     
@@ -58,19 +71,13 @@ export async function importQuestionsJSON(
         let rawData = cleanAndParseJSON(jsonData)
         let questions: JSONQuestion[] = []
 
-        // Extract nested array if root is an object containing a list (e.g. {"preguntas": [...]})
-        if (rawData && typeof rawData === 'object' && !Array.isArray(rawData)) {
-            const arrayKey = Object.keys(rawData).find(key => Array.isArray(rawData[key]))
-            if (arrayKey) {
-                rawData = rawData[arrayKey]
-            } else {
-                return { success: false, error: "El JSON debe contener un array de preguntas (directo o dentro de una propiedad)." }
-            }
+        // Extract nested array recursively if root is an object
+        const questionsArray = findFirstArray(rawData)
+        if (!questionsArray) {
+            return { success: false, error: "El JSON debe contener un listado (array) de preguntas en alguna de sus propiedades o en la raíz." }
         }
+        rawData = questionsArray
 
-        if (!Array.isArray(rawData)) {
-            return { success: false, error: "El JSON debe ser un array de preguntas" }
-        }
 
         // Normalize Data: Support English/Spanish synonyms and different formats
         questions = rawData.map((item: any) => {
