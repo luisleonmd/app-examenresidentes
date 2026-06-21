@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { PrismaClient } from "@prisma/client"
 import { auth } from "@/auth"
 import { importQuestionsJSON } from "@/app/lib/json-import"
+import { revalidatePath } from "next/cache"
 
 const prisma = new PrismaClient()
 
@@ -64,6 +65,37 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(result)
     } catch (error: any) {
         console.error("Failed to import questions via API:", error)
+        return NextResponse.json({ error: error.message || String(error) }, { status: 500 })
+    }
+}
+
+export async function DELETE(req: NextRequest) {
+    try {
+        const session = await auth()
+        if (!session?.user || session.user.role !== 'COORDINADOR') {
+            return NextResponse.json({ error: "No autorizado" }, { status: 401 })
+        }
+
+        const { searchParams } = new URL(req.url)
+        const categoryId = searchParams.get("categoryId")
+
+        if (!categoryId) {
+            return NextResponse.json({ error: "Falta el campo categoryId" }, { status: 400 })
+        }
+
+        const result = await prisma.question.deleteMany({
+            where: { category_id: categoryId }
+        })
+
+        revalidatePath('/dashboard/categories')
+        revalidatePath('/dashboard/questions')
+
+        return NextResponse.json({
+            success: true,
+            message: `Se eliminaron ${result.count} preguntas de la categoría.`
+        })
+    } catch (error: any) {
+        console.error("Failed to delete questions via API:", error)
         return NextResponse.json({ error: error.message || String(error) }, { status: 500 })
     }
 }

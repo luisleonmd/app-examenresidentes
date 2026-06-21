@@ -14,8 +14,8 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { deleteAllQuestionsInCategory } from "@/app/lib/questions"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { useRouter } from "next/navigation"
 
 interface ClearCategoryButtonProps {
     id: string
@@ -26,16 +26,32 @@ interface ClearCategoryButtonProps {
 export function ClearCategoryButton({ id, name, questionCount }: ClearCategoryButtonProps) {
     const [open, setOpen] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
+    const router = useRouter()
 
     async function handleDelete() {
         setIsDeleting(true)
-        const result = await deleteAllQuestionsInCategory(id)
-        setIsDeleting(false)
+        try {
+            const response = await fetch(`/api/questions?categoryId=${id}`, {
+                method: "DELETE"
+            })
 
-        if (result.success) {
-            setOpen(false)
-        } else {
-            alert(result.error)
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}))
+                throw new Error(errData.error || `HTTP error! status: ${response.status}`)
+            }
+
+            const result = await response.json()
+            if (result.success) {
+                setOpen(false)
+                router.refresh()
+            } else {
+                alert(result.error || "Error al vaciar la categoría.")
+            }
+        } catch (error: any) {
+            console.error("Failed to clear category:", error)
+            alert(error instanceof Error ? error.message : String(error))
+        } finally {
+            setIsDeleting(false)
         }
     }
 

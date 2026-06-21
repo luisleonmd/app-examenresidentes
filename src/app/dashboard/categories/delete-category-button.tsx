@@ -14,7 +14,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { deleteCategory } from "@/app/lib/categories"
+import { useRouter } from "next/navigation"
 
 interface DeleteCategoryButtonProps {
     id: string
@@ -25,6 +25,7 @@ interface DeleteCategoryButtonProps {
 export function DeleteCategoryButton({ id, name, questionCount }: DeleteCategoryButtonProps) {
     const [open, setOpen] = useState(false)
     const [loading, setLoading] = useState(false)
+    const router = useRouter()
 
     const [mounted, setMounted] = useState(false)
 
@@ -34,13 +35,28 @@ export function DeleteCategoryButton({ id, name, questionCount }: DeleteCategory
 
     const handleDelete = async () => {
         setLoading(true)
-        const result = await deleteCategory(id)
-        setLoading(false)
+        try {
+            const response = await fetch(`/api/categories?categoryId=${id}`, {
+                method: "DELETE"
+            })
 
-        if (result.success) {
-            setOpen(false)
-        } else {
-            alert(result.error)
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}))
+                throw new Error(errData.error || `HTTP error! status: ${response.status}`)
+            }
+
+            const result = await response.json()
+            if (result.success) {
+                setOpen(false)
+                router.refresh()
+            } else {
+                alert(result.error || "Error al eliminar la categoría.")
+            }
+        } catch (error: any) {
+            console.error("Failed to delete category:", error)
+            alert(error instanceof Error ? error.message : String(error))
+        } finally {
+            setLoading(false)
         }
     }
 
