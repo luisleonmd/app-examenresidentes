@@ -33,6 +33,7 @@ import {
     Search
 } from "lucide-react"
 import { uploadBibliographyResource, deleteBibliographyResource } from "@/app/lib/bibliography-actions"
+import { CATEGORY_CONFIG } from "@/app/lib/exam-config"
 
 interface BibliographyResource {
     id: string
@@ -190,6 +191,9 @@ export function BibliografiaTab({ categories }: BibliografiaTabProps) {
         c.name.toLowerCase().includes(searchTerm.toLowerCase())
     )
 
+    const rotations = filteredCategories.filter(c => CATEGORY_CONFIG[c.name]?.type === 'ROTATION')
+    const courses = filteredCategories.filter(c => CATEGORY_CONFIG[c.name]?.type !== 'ROTATION')
+
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Sidebar list of Rotations / Courses */}
@@ -201,44 +205,94 @@ export function BibliografiaTab({ categories }: BibliografiaTabProps) {
                     <div className="relative">
                         <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
-                            placeholder="Buscar rotación..."
+                            placeholder="Buscar rotación o curso..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="pl-8 h-9"
                         />
                     </div>
                 </div>
-                <div className="overflow-y-auto flex-1 divide-y">
-                    {filteredCategories.length === 0 ? (
-                        <div className="p-4 text-center text-muted-foreground text-sm">
-                            No se encontraron rotaciones.
+                <div className="overflow-y-auto flex-1 divide-y divide-slate-100">
+                    {rotations.length > 0 && (
+                        <div>
+                            <div className="bg-slate-50 px-4 py-2 text-xs font-bold text-blue-800 uppercase tracking-wider flex justify-between items-center border-b border-t first:border-t-0">
+                                <span>Rotaciones</span>
+                                <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-[10px] font-semibold">
+                                    {rotations.length}
+                                </span>
+                            </div>
+                            <div className="divide-y divide-slate-100">
+                                {rotations.map((cat) => (
+                                    <button
+                                        key={cat.id}
+                                        onClick={() => {
+                                            setSelectedCatId(cat.id)
+                                        }}
+                                        className={`w-full text-left p-3.5 transition-colors text-sm ${
+                                            selectedCatId === cat.id
+                                                ? "bg-blue-50/70 border-l-4 border-blue-600 font-semibold text-blue-700"
+                                                : "hover:bg-slate-50 text-foreground"
+                                        }`}
+                                    >
+                                        <div className="flex items-start justify-between gap-2">
+                                            <div className="flex items-start gap-2 truncate">
+                                                <BookOpen className={`size-4 mt-0.5 shrink-0 ${
+                                                    selectedCatId === cat.id ? "text-blue-600" : "text-slate-400"
+                                                }`} />
+                                                <span className="truncate">{cat.name}</span>
+                                            </div>
+                                            <span className="shrink-0 bg-slate-100 px-2 py-0.5 rounded text-[10px] font-normal text-slate-500">
+                                                {cat.bibliographies?.length || 0} recs
+                                            </span>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
                         </div>
-                    ) : (
-                        filteredCategories.map((cat) => (
-                            <button
-                                key={cat.id}
-                                onClick={() => {
-                                    setSelectedCatId(cat.id)
-                                }}
-                                className={`w-full text-left p-4 transition-colors text-sm ${
-                                    selectedCatId === cat.id
-                                        ? "bg-blue-50/70 border-l-4 border-blue-600 font-semibold text-blue-700"
-                                        : "hover:bg-slate-50 text-foreground"
-                                }`}
-                            >
-                                <div className="flex items-start justify-between gap-2">
-                                    <div className="flex items-start gap-2 truncate">
-                                        <BookOpen className={`size-4 mt-0.5 shrink-0 ${
-                                            selectedCatId === cat.id ? "text-blue-600" : "text-slate-400"
-                                        }`} />
-                                        <span className="truncate">{cat.name}</span>
-                                    </div>
-                                    <span className="shrink-0 bg-slate-100 px-2 py-0.5 rounded text-[10px] font-normal text-slate-500">
-                                        {cat.bibliographies?.length || 0} recs
-                                    </span>
-                                </div>
-                            </button>
-                        ))
+                    )}
+
+                    {courses.length > 0 && (
+                        <div>
+                            <div className="bg-slate-50 px-4 py-2 text-xs font-bold text-amber-800 uppercase tracking-wider flex justify-between items-center border-b border-t">
+                                <span>Cursos</span>
+                                <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full text-[10px] font-semibold">
+                                    {courses.length}
+                                </span>
+                            </div>
+                            <div className="divide-y divide-slate-100">
+                                {courses.map((cat) => (
+                                    <button
+                                        key={cat.id}
+                                        onClick={() => {
+                                            setSelectedCatId(cat.id)
+                                        }}
+                                        className={`w-full text-left p-3.5 transition-colors text-sm ${
+                                            selectedCatId === cat.id
+                                                ? "bg-blue-50/70 border-l-4 border-blue-600 font-semibold text-blue-700"
+                                                : "hover:bg-slate-50 text-foreground"
+                                        }`}
+                                    >
+                                        <div className="flex items-start justify-between gap-2">
+                                            <div className="flex items-start gap-2 truncate">
+                                                <BookOpen className={`size-4 mt-0.5 shrink-0 ${
+                                                    selectedCatId === cat.id ? "text-blue-600" : "text-slate-400"
+                                                }`} />
+                                                <span className="truncate">{cat.name}</span>
+                                            </div>
+                                            <span className="shrink-0 bg-slate-100 px-2 py-0.5 rounded text-[10px] font-normal text-slate-500">
+                                                {cat.bibliographies?.length || 0} recs
+                                            </span>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {filteredCategories.length === 0 && (
+                        <div className="p-4 text-center text-muted-foreground text-sm">
+                            No se encontraron rotaciones ni cursos.
+                        </div>
                     )}
                 </div>
             </div>

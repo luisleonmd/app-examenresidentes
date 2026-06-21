@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Trash2, Loader2 } from "lucide-react"
-import { deleteAllCategoriesAndQuestions } from "@/app/lib/delete-all-data"
+import { deleteOnlyAiQuestions } from "@/app/lib/delete-all-data"
 
 export function DeleteAllQuestionsButton() {
     const [loading, setLoading] = useState(false)
@@ -12,16 +12,16 @@ export function DeleteAllQuestionsButton() {
 
     const handleDelete = async () => {
         const confirmed = window.confirm(
-            "¿Estás seguro de que deseas eliminar TODAS las preguntas, categorías, exámenes e intentos registrados? Esta acción no se puede deshacer."
+            "¿Estás seguro de que deseas eliminar todos los casos clínicos generados por IA del banco? Las categorías, bibliografías y preguntas manuales no se verán afectadas."
         )
 
         if (!confirmed) return
 
         setLoading(true)
         try {
-            const result = await deleteAllCategoriesAndQuestions()
+            const result = await deleteOnlyAiQuestions()
             if (result.success) {
-                alert(`Limpieza exitosa. Se eliminaron ${result.deletedQuestions} preguntas y ${result.deletedCategories} categorías.`)
+                alert(`Limpieza exitosa. Se eliminaron ${result.deletedQuestions} preguntas del banco de Casos Clínicos IA.`)
                 router.refresh()
             } else {
                 alert(result.error || "Ocurrió un error al limpiar los datos.")
@@ -48,7 +48,7 @@ export function DeleteAllQuestionsButton() {
             ) : (
                 <>
                     <Trash2 className="size-4" />
-                    Vaciar Banco de Preguntas
+                    Eliminar Casos IA
                 </>
             )}
         </Button>
