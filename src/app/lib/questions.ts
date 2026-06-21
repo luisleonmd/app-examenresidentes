@@ -15,7 +15,7 @@ export type QuestionOption = {
 export async function getCategories(source?: string) {
     try {
         const whereClause: any = {}
-        let countWhere: any = undefined
+        let countWhere: any = { status: 'PUBLISHED' }
 
         if (source === 'MANUAL') {
             // Include categories with MANUAL questions or empty categories
@@ -23,18 +23,18 @@ export async function getCategories(source?: string) {
                 { questions: { some: { source: 'MANUAL' } } },
                 { questions: { none: {} } }
             ]
-            countWhere = { source: 'MANUAL' }
+            countWhere = { source: 'MANUAL', status: 'PUBLISHED' }
         } else if (source === 'JSON_BANK') {
-            // Only categories that actually have JSON_BANK questions
-            whereClause.questions = { some: { source: 'JSON_BANK' } }
-            countWhere = { source: 'JSON_BANK' }
+            // Only categories that actually have JSON_BANK questions with status PUBLISHED
+            whereClause.questions = { some: { source: 'JSON_BANK', status: 'PUBLISHED' } }
+            countWhere = { source: 'JSON_BANK', status: 'PUBLISHED' }
         }
 
         return await prisma.questionCategory.findMany({
             where: whereClause,
             include: {
                 _count: {
-                    select: { questions: countWhere ? { where: countWhere } : true }
+                    select: { questions: { where: countWhere } }
                 }
             },
             orderBy: { name: 'asc' }
