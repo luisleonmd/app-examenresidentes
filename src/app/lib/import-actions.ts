@@ -4,7 +4,7 @@ import { auth } from "@/auth"
 import { PrismaClient } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 const mammoth = require("mammoth")
-// const pdf = require("pdf-parse")
+const pdf = require("pdf-parse")
 
 const prisma = new PrismaClient()
 
@@ -48,9 +48,8 @@ export async function uploadQuestionsFile(formData: FormData) {
             const result = await mammoth.extractRawText({ buffer })
             rawText = result.value
         } else if (file.name.endsWith(".pdf")) {
-            return { success: false, message: "PDF no soportado temporalmente. Use DOCX." }
-            // const data = await pdf(buffer)
-            // rawText = data.text
+            const data = await pdf(buffer)
+            rawText = data.text
         } else {
             return { success: false, message: "Formato no soportado. Use PDF o DOCX." }
         }

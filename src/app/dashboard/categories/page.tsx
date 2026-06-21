@@ -13,6 +13,7 @@ import { DeleteCategoryButton } from "./delete-category-button"
 import { EditCategoryButton } from "./edit-category-button"
 import { MergeCategoryButton } from "./merge-category-button"
 import { ViewCategoryQuestionsButton } from "./view-category-questions-button"
+import { ImportToCategoryDialog } from "./import-to-category-dialog"
 import { DeleteAllCategoriesButton } from "./delete-all-categories-button"
 import { ClearCategoryButton } from "./clear-category-button"
 
@@ -102,6 +103,12 @@ export default async function CategoriesPage(props: {
                                                     questionCount={cat._count?.questions || 0}
                                                     canEdit={isCoordinador}
                                                 />
+                                                {isCoordinador && (
+                                                    <ImportToCategoryDialog
+                                                        categoryId={cat.id}
+                                                        categoryName={cat.name}
+                                                    />
+                                                )}
                                             </div>
                                         </TableCell>
                                     </TableRow>
@@ -148,6 +155,12 @@ export default async function CategoriesPage(props: {
                                                         questionCount={cat._count?.questions || 0}
                                                         canEdit={isCoordinador}
                                                     />
+                                                    {isCoordinador && (
+                                                        <ImportToCategoryDialog
+                                                            categoryId={cat.id}
+                                                            categoryName={cat.name}
+                                                        />
+                                                    )}
                                                     <EditCategoryButton
                                                         id={cat.id}
                                                         name={cat.name}
