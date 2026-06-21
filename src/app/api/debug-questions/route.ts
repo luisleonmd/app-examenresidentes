@@ -72,6 +72,7 @@ export async function GET(req: NextRequest) {
 
         // 4. Return all information
         return NextResponse.json({
+            version: "v1.0.1-verify-deploy",
             categoryName: category.name,
             categoryId: category.id,
             totalQuestionsInDb: allQuestionsCount,
@@ -89,6 +90,7 @@ export async function GET(req: NextRequest) {
         })
 
     } catch (error: any) {
-        return NextResponse.json({ error: error.message || String(error) }, { status: 500 })
+        return NextResponse.json({ error: error.message || String(error), version: "v1.0.1-verify-deploy-error" }, { status: 500 })
     }
 }
+
