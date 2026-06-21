@@ -22,7 +22,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { importQuestionsJSON } from "@/app/lib/json-import"
 import { getCategories } from "@/app/lib/questions"
 
 export function ImportJSONDialog() {
@@ -87,7 +86,24 @@ export function ImportJSONDialog() {
         }
 
         try {
-            const response = await importQuestionsJSON(jsonText, options)
+            const res = await fetch("/api/questions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    jsonText,
+                    overrideCategoryId: options.overrideCategoryId,
+                    newCategoryName: options.newCategoryName,
+                }),
+            })
+
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}))
+                throw new Error(errData.error || `HTTP error! status: ${res.status}`)
+            }
+
+            const response = await res.json()
             setResult(response)
 
             if (response.success && (!response.errors || response.errors.length === 0)) {
@@ -97,8 +113,9 @@ export function ImportJSONDialog() {
                     setResult(null)
                 }, 2000)
             }
-        } catch (err) {
-            setResult({ success: false, error: "Error de conexión o timeout. Intente con menos preguntas." })
+        } catch (err: any) {
+            console.error("JSON import error:", err)
+            setResult({ success: false, error: err instanceof Error ? err.message : "Error de conexión o timeout. Intente con menos preguntas." })
         } finally {
             setLoading(false)
         }

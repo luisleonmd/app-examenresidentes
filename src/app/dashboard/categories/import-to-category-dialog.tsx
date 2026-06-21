@@ -16,7 +16,6 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { uploadQuestionsFile } from "@/app/lib/import-actions"
-import { importQuestionsJSON } from "@/app/lib/json-import"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 interface ImportToCategoryDialogProps {
@@ -98,7 +97,23 @@ export function ImportToCategoryDialog({ categoryId, categoryName }: ImportToCat
         setResult(null)
 
         try {
-            const res = await importQuestionsJSON(jsonText, { overrideCategoryId: categoryId })
+            const response = await fetch("/api/questions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    jsonText,
+                    overrideCategoryId: categoryId,
+                }),
+            })
+
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}))
+                throw new Error(errData.error || `HTTP error! status: ${response.status}`)
+            }
+
+            const res = await response.json()
             setResult({
                 success: res.success,
                 message: res.message || (res.error as string) || "Error al procesar el JSON.",

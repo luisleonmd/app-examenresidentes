@@ -123,20 +123,20 @@ export async function importQuestionsJSON(
             if (!item || typeof item !== "object") return item
 
             // Support English & Spanish synonyms for key fields
-            const text = item.text || item.question || item.pregunta || item.enunciado || "";
+            const text = item.text || item.question || item.pregunta || item.enunciado || item.caso || "";
             const category = item.category || item.categoria || item.tema || item.curso_rotacion || "";
             const imageUrl = item.image_url || item.imageUrl || item.imagen || undefined;
-            const hint = item.hint || item.pista || "";
+            const hint = item.hint || item.pista || item.pistas || "";
             
             let explanation = item.explanation || item.explicacion || item.justificacion || item.justificacion_correcta || item.rationale || "";
             
-            let rawOptions = item.options || item.opciones || item.answerOptions || item.respuestas || [];
+            let rawOptions = item.options || item.opciones || item.answerOptions || item.respuestas || item.alternativas || item.distractores || item.opciones_respuesta || [];
             let options: any[] = [];
             
             if (Array.isArray(rawOptions)) {
                 options = rawOptions.map((opt: any) => {
                     if (!opt || typeof opt !== "object") return opt;
-                    const optText = opt.text || opt.texto || opt.opcion || "";
+                    const optText = opt.text || opt.texto || opt.opcion || opt.respuesta || opt.alternativa || opt.distractor || "";
                     const isCorrect = opt.is_correct !== undefined 
                         ? opt.is_correct 
                         : (opt.isCorrect !== undefined 
