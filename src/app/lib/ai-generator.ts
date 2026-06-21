@@ -47,9 +47,29 @@ export async function generateQuestionsWithAI(
             return { success: false, error: "Categoría no encontrada." }
         }
 
-        const categoryBiblio = category.bibliography 
-            ? category.bibliography.trim()
-            : "No hay bibliografía oficial configurada para esta rotación/curso. Por favor, usa bibliografía general recomendada de Medicina Familiar y Atención Primaria."
+        const bibliographies = await prisma.categoryBibliography.findMany({
+            where: { category_id: categoryId }
+        })
+
+        let categoryBiblio = ""
+        if (bibliographies.length === 0) {
+            categoryBiblio = "No hay bibliografía oficial configurada para esta rotación/curso. Por favor, usa bibliografía general recomendada de Medicina Familiar y Atención Primaria como base para tus preguntas."
+        } else {
+            categoryBiblio = "Utiliza como base y fuente de verdad obligatoria la siguiente bibliografía oficial cargada en el sistema:\n"
+            bibliographies.forEach((b, idx) => {
+                categoryBiblio += `\n--- RECURSO ${idx + 1}: ${b.title} (${b.type}) ---\n`
+                if (b.type === "WEB" && b.url) {
+                    categoryBiblio += `URL de Referencia: ${b.url}\n`
+                }
+                if (b.text_content) {
+                    // Limit text content to 8000 characters per resource to keep prompt size reasonable
+                    const truncatedText = b.text_content.substring(0, 8000)
+                    categoryBiblio += `Contenido de Texto Extraído/Notas:\n${truncatedText}\n`
+                } else {
+                    categoryBiblio += `(Archivo multimedia. Basa las preguntas en el tema y título general: ${b.title})\n`
+                }
+            })
+        }
 
         // 3. Construct Prompt
         const prompt = `Actúa como un experto en educación médica y creador de exámenes profesionales para residentes de Medicina Familiar en América Latina y España, aplicando la rigurosidad analítica de los exámenes MIR de España.

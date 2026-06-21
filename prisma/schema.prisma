@@ -52,11 +52,23 @@ model Enrollment {
 }
 
 model QuestionCategory {
-  id           String     @id @default(uuid())
-  name         String
-  description  String?
-  questions    Question[]
-  bibliography String?    // Bibliography configuration for rotation or course
+  id             String                 @id @default(uuid())
+  name           String
+  description    String?
+  questions      Question[]
+  bibliographies CategoryBibliography[] // Official bibliography files or links
+}
+
+model CategoryBibliography {
+  id           String           @id @default(uuid())
+  category_id  String
+  category     QuestionCategory @relation(fields: [category_id], references: [id], onDelete: Cascade)
+  title        String
+  type         String           // PDF, WORD, WEB, VIDEO, AUDIO
+  url          String?          // For web links
+  file_path    String?          // Path to local file
+  text_content String?          // Extracted text content or manual transcription notes
+  created_at   DateTime         @default(now())
 }
 
 model Question {

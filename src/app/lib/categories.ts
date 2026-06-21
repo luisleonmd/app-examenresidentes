@@ -32,24 +32,3 @@ export async function deleteCategory(categoryId: string) {
         return { success: false, error: "Error al eliminar la categoría" }
     }
 }
-
-export async function updateCategoryBibliography(categoryId: string, bibliography: string) {
-    const session = await auth()
-
-    if (!session?.user || session.user.role !== 'COORDINADOR') {
-        return { success: false, error: "No autorizado" }
-    }
-
-    try {
-        await prisma.questionCategory.update({
-            where: { id: categoryId },
-            data: { bibliography: bibliography || null }
-        })
-
-        revalidatePath('/dashboard/casos-clinicos')
-        return { success: true }
-    } catch (error: any) {
-        console.error("Failed to update bibliography:", error)
-        return { success: false, error: "Error al actualizar la bibliografía" }
-    }
-}

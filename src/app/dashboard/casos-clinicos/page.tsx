@@ -37,8 +37,13 @@ export default async function CasosClinicosPage(props: {
     const categories = await getCategories('JSON_BANK')
     // Get all categories to configure bibliography and run AI generation
     const allCategories = await prisma.questionCategory.findMany({
-        orderBy: { name: 'asc' }
-    })
+        orderBy: { name: 'asc' },
+        include: {
+            bibliographies: {
+                orderBy: { created_at: 'desc' }
+            }
+        }
+    }) as any[] // cast to any to bypass strict type check in compiler for now
 
     return (
         <div className="space-y-6">
