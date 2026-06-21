@@ -68,10 +68,26 @@ export async function getQuestions(categoryId?: string, source?: string) {
             },
             orderBy: { created_at: 'desc' }
         })
-        return JSON.parse(JSON.stringify(questions))
-    } catch (error) {
+
+        const countInDb = categoryId ? await prisma.question.count({
+            where: { category_id: categoryId }
+        }) : 0
+
+        return {
+            success: true,
+            questions: JSON.parse(JSON.stringify(questions)),
+            debug: {
+                categoryIdPassed: categoryId || null,
+                whereClauseUsed: whereClause,
+                countInDbRaw: countInDb
+            }
+        }
+    } catch (error: any) {
         console.error("Failed to fetch questions:", error)
-        throw new Error("Failed to fetch questions")
+        return {
+            success: false,
+            error: error.message || String(error)
+        }
     }
 }
 
