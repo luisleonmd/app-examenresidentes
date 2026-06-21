@@ -17,6 +17,33 @@ interface JSONQuestion {
     }>
 }
 
+function cleanAndParseJSON(jsonStr: string): any {
+    let cleanStr = jsonStr.trim()
+    
+    // 1. Strip markdown code block wrappers if present (e.g. ```json ... ```)
+    if (cleanStr.startsWith("```")) {
+        cleanStr = cleanStr.replace(/^```[a-zA-Z0-9_-]*/, "")
+    }
+    if (cleanStr.endsWith("```")) {
+        cleanStr = cleanStr.replace(/```$/, "")
+    }
+    cleanStr = cleanStr.trim()
+
+    // 2. Try parsing directly first (safe, fast, doesn't mutate)
+    try {
+        return JSON.parse(cleanStr)
+    } catch (firstError) {
+        // If standard parsing fails, clean trailing commas and try once more
+        try {
+            const regexCleaned = cleanStr.replace(/,\s*([\]}])/g, "$1")
+            return JSON.parse(regexCleaned)
+        } catch (secondError) {
+            // Rethrow the original syntax error for accurate error position reporting
+            throw firstError
+        }
+    }
+}
+
 export async function importQuestionsJSON(
     jsonData: string,
     options: { overrideCategoryId?: string, newCategoryName?: string } = {}
@@ -27,41 +54,65 @@ export async function importQuestionsJSON(
     }
 
     try {
-        // Parse JSON
-        const rawData = JSON.parse(jsonData)
+        // Robust Parse
+        let rawData = cleanAndParseJSON(jsonData)
         let questions: JSONQuestion[] = []
+
+        // Extract nested array if root is an object containing a list (e.g. {"preguntas": [...]})
+        if (rawData && typeof rawData === 'object' && !Array.isArray(rawData)) {
+            const arrayKey = Object.keys(rawData).find(key => Array.isArray(rawData[key]))
+            if (arrayKey) {
+                rawData = rawData[arrayKey]
+            } else {
+                return { success: false, error: "El JSON debe contener un array de preguntas (directo o dentro de una propiedad)." }
+            }
+        }
 
         if (!Array.isArray(rawData)) {
             return { success: false, error: "El JSON debe ser un array de preguntas" }
         }
 
-        // Normalize Data: Support both formats (Standard vs Legacy/Custom)
+        // Normalize Data: Support English/Spanish synonyms and different formats
         questions = rawData.map((item: any) => {
-            // Check if it matches the "Legacy/Custom" format
-            if (item.pregunta && item.opciones && !Array.isArray(item.opciones)) {
+            if (!item || typeof item !== "object") return item
 
-                // Convert options object {"A": "...", "B": "..."} to array
-                const optsArray = Object.entries(item.opciones).map(([key, val]) => ({
+            // Support English & Spanish synonyms for key fields
+            const text = item.text || item.pregunta || item.enunciado || "";
+            const explanation = item.explanation || item.explicacion || item.justificacion || item.justificacion_correcta || "";
+            const category = item.category || item.categoria || item.tema || item.curso_rotacion || "";
+            const imageUrl = item.image_url || item.imageUrl || item.imagen || undefined;
+            
+            let rawOptions = item.options || item.opciones || [];
+            let options: any[] = [];
+            
+            if (Array.isArray(rawOptions)) {
+                options = rawOptions.map((opt: any) => {
+                    if (!opt || typeof opt !== "object") return opt;
+                    const optText = opt.text || opt.texto || opt.opcion || "";
+                    const isCorrect = opt.is_correct !== undefined 
+                        ? opt.is_correct 
+                        : (opt.correcta !== undefined 
+                            ? opt.correcta 
+                            : (opt.es_correcta !== undefined ? opt.es_correcta : false));
+                    return { text: optText, is_correct: isCorrect };
+                });
+            } else if (typeof rawOptions === 'object' && rawOptions !== null) {
+                // Support legacy format: options is an object like {"A": "...", "B": "..."}
+                const correctKey = item.respuesta_correcta || item.correcta || item.es_correcta || "";
+                options = Object.entries(rawOptions).map(([key, val]) => ({
                     text: String(val),
-                    is_correct: item.respuesta_correcta === key
-                }))
-
-                return {
-                    text: item.pregunta,
-                    explanation: item.justificacion_correcta || item.feedback_incorrecto?.[item.respuesta_correcta],
-                    category: item.tema || item.curso_rotacion || "General",
-                    options: optsArray,
-                    image_url: undefined
-                }
+                    is_correct: correctKey === key
+                }));
             }
 
-            // Return as is (Standard format) or incomplete object to be caught by validation
-            return item as JSONQuestion
+            return {
+                text,
+                explanation,
+                category,
+                options,
+                image_url: imageUrl
+            } as JSONQuestion;
         })
-
-        if (!Array.isArray(questions)) {
-            return { success: false, error: "El JSON debe ser un array de preguntas" } // Redundant but safe
-        }
 
         let importedCount = 0
         const errors: string[] = []
@@ -90,7 +141,7 @@ export async function importQuestionsJSON(
             // Validate question structure
             // If we have a targetCategory, we don't strictly need q.category in JSON
             if (!q.text || (!q.category && !targetCategoryId) || !q.options || !Array.isArray(q.options)) {
-                errors.push(`Pregunta ${i + 1}: Faltan campos requeridos (text, category*, options).`)
+                errors.push(`Pregunta ${i + 1}: Faltan campos requeridos (text/pregunta, category/categoria*, options/opciones).`)
                 continue
             }
 
@@ -169,8 +220,11 @@ export async function importQuestionsJSON(
             imported: importedCount,
             message: `${importedCount} preguntas importadas exitosamente`
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error("JSON import error:", error)
-        return { success: false, error: "Error al procesar el JSON. Verifique el formato." }
+        return { 
+            success: false, 
+            error: `Error de sintaxis en el JSON: ${error.message || String(error)}. Verifique el formato, que no falten comillas o que las llaves {} y corchetes [] estén bien balanceados.` 
+        }
     }
 }

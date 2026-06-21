@@ -308,39 +308,44 @@ export async function getExamResult(attemptId: string) {
 
     if (!isOwner && !isStaff) throw new Error("Acceso denegado")
 
-    // If it's the owner, exam must be SUBMITTED to see results (normally)
-    // But we already handle status check in UI or logic usually.
+    const now = new Date()
+    const endWindow = attempt.exam.end_window
+    const canReview = isStaff || now > endWindow
 
-    // Fetch claims for this attempt
-    const claims = await prisma.claim.findMany({
-        where: { attempt_id: attemptId }
-    })
-    const claimsMap = new Map()
-    claims.forEach(c => claimsMap.set(c.question_id, c))
+    let resultDetails: any[] = []
 
-    const resultDetails = attempt.answers.map(ans => {
-        const options = JSON.parse(ans.question.options) as any[]
-        // Enrich options with is_correct for display
-        const enrichedOptions = options.map(opt => ({
-            id: opt.id,
-            text: opt.text,
-            is_correct: opt.is_correct
-        }))
+    if (canReview) {
+        // Fetch claims for this attempt only if they can review
+        const claims = await prisma.claim.findMany({
+            where: { attempt_id: attemptId }
+        })
+        const claimsMap = new Map()
+        claims.forEach(c => claimsMap.set(c.question_id, c))
 
-        const claim = claimsMap.get(ans.question_id)
+        resultDetails = attempt.answers.map(ans => {
+            const options = JSON.parse(ans.question.options) as any[]
+            // Enrich options with is_correct for display
+            const enrichedOptions = options.map(opt => ({
+                id: opt.id,
+                text: opt.text,
+                is_correct: opt.is_correct
+            }))
 
-        return {
-            questionId: ans.question_id,
-            text: ans.question.text,
-            explanation: ans.question.explanation,
-            options: enrichedOptions,
-            selectedOptionId: ans.selected_option_id,
-            isCorrect: ans.is_correct,
-            isClaimed: !!claim,
-            claimStatus: claim?.status,
-            claimNotes: claim?.resolution_notes
-        }
-    })
+            const claim = claimsMap.get(ans.question_id)
+
+            return {
+                questionId: ans.question_id,
+                text: ans.question.text,
+                explanation: ans.question.explanation,
+                options: enrichedOptions,
+                selectedOptionId: ans.selected_option_id,
+                isCorrect: ans.is_correct,
+                isClaimed: !!claim,
+                claimStatus: claim?.status,
+                claimNotes: claim?.resolution_notes
+            }
+        })
+    }
 
     return {
         examTitle: attempt.exam.title,
@@ -348,6 +353,8 @@ export async function getExamResult(attemptId: string) {
         status: attempt.status,
         submittedAt: attempt.end_time,
         userRole: session.user.role,
+        endWindow: attempt.exam.end_window,
+        canReview: canReview,
         details: resultDetails
     }
 }
