@@ -46,7 +46,46 @@ function cleanAndParseJSON(jsonStr: string): any {
     try {
         return JSON.parse(cleanStr)
     } catch (firstError) {
-        // If standard parsing fails, clean trailing commas and try once more
+        // If it failed, try to locate JSON boundaries within conversational text
+        const firstBrace = cleanStr.indexOf('{')
+        const firstBracket = cleanStr.indexOf('[')
+        
+        let startIdx = -1
+        if (firstBrace !== -1 && firstBracket !== -1) {
+            startIdx = Math.min(firstBrace, firstBracket)
+        } else if (firstBrace !== -1) {
+            startIdx = firstBrace
+        } else if (firstBracket !== -1) {
+            startIdx = firstBracket
+        }
+
+        const lastBrace = cleanStr.lastIndexOf('}')
+        const lastBracket = cleanStr.lastIndexOf(']')
+        let endIdx = -1
+        if (lastBrace !== -1 && lastBracket !== -1) {
+            endIdx = Math.max(lastBrace, lastBracket)
+        } else if (lastBrace !== -1) {
+            endIdx = lastBrace
+        } else if (lastBracket !== -1) {
+            endIdx = lastBracket
+        }
+
+        if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
+            const extracted = cleanStr.substring(startIdx, endIdx + 1)
+            try {
+                return JSON.parse(extracted)
+            } catch (extractError) {
+                // If it fails, try cleaning trailing commas on extracted
+                try {
+                    const regexCleaned = extracted.replace(/,\s*([\]}])/g, "$1")
+                    return JSON.parse(regexCleaned)
+                } catch (e) {
+                    // fall through
+                }
+            }
+        }
+
+        // Try cleaning trailing commas on the original cleanStr
         try {
             const regexCleaned = cleanStr.replace(/,\s*([\]}])/g, "$1")
             return JSON.parse(regexCleaned)
@@ -61,12 +100,12 @@ export async function importQuestionsJSON(
     jsonData: string,
     options: { overrideCategoryId?: string, newCategoryName?: string } = {}
 ) {
-    const session = await auth()
-    if (!session?.user || session.user.role === 'RESIDENTE') {
-        return { success: false, error: "No autorizado" }
-    }
-
     try {
+        const session = await auth()
+        if (!session?.user || session.user.role === 'RESIDENTE') {
+            return { success: false, error: "No autorizado" }
+        }
+
         // Robust Parse
         let rawData = cleanAndParseJSON(jsonData)
         let questions: JSONQuestion[] = []

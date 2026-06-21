@@ -101,7 +101,7 @@ export function ImportToCategoryDialog({ categoryId, categoryName }: ImportToCat
             const res = await importQuestionsJSON(jsonText, { overrideCategoryId: categoryId })
             setResult({
                 success: res.success,
-                message: res.message || (res.error as string),
+                message: res.message || (res.error as string) || "Error al procesar el JSON.",
                 details: res.errors && res.errors.length > 0 ? res.errors.join("\n") : undefined
             })
             if (res.success) {
@@ -110,8 +110,13 @@ export function ImportToCategoryDialog({ categoryId, categoryName }: ImportToCat
                 // Auto close on success after a short delay
                 setTimeout(() => setOpen(false), 2500)
             }
-        } catch (error) {
-            setResult({ success: false, message: "Error al procesar el JSON." })
+        } catch (error: any) {
+            console.error("JSON import error:", error)
+            setResult({ 
+                success: false, 
+                message: "Error al procesar el JSON.", 
+                details: error instanceof Error ? error.message : String(error) 
+            })
         } finally {
             setIsImportingJson(false)
         }
